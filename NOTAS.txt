@@ -1,0 +1,51 @@
+Crear entorno virtual:
+    python -m venv microdom
+
+Entrar a entorno virtual:
+    source microdom/bin/activate
+
+Salir de entorno virtual
+    deactivate
+
+Crear imagen utilizando DockerFile con etiqueta microdom
+    docker build -t microdom .
+
+Ejecutar contenedor redirijiendo puerto local 8080 a puerto 8080 del contenedor
+    docker run -p 8080:8080 microdom
+    docker run -d -p 8080:8080 --restart unless-stopped microdom
+
+
+Comando Docker:
+    docker ps
+    docker ps -a
+    docker container prune (Borra los exited)
+    docker rm 424c42019953 (Borra el ID)
+    
+    docker stop boring_kapitsa
+    docker update --restart unless-stopped boring_kapitsa
+    docker start boring_kapitsa
+
+walter@lnx3001:~$ docker ps
+CONTAINER ID   IMAGE      COMMAND                  CREATED       STATUS       PORTS                                         NAMES
+71bc6a6164cc   microdom   "uvicorn app.main:ap…"   13 days ago   Up 13 days   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   boring_kapitsa
+walter@lnx3001:~$ docker ps -a
+CONTAINER ID   IMAGE          COMMAND                   CREATED       STATUS                     PORTS                                         NAMES
+71bc6a6164cc   microdom       "uvicorn app.main:ap…"    13 days ago   Up 13 days                 0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   boring_kapitsa
+424c42019953   7060c9dcab47   "uvicorn app.main:ap…"    13 days ago   Exited (0) 13 days ago                                                   stoic_bartik
+6c4195f6fb6e   07bf35859113   "uvicorn app.main:ap…"    13 days ago   Exited (0) 13 days ago                                                   admiring_cartwright
+96307f7eaa48   07bf35859113   "uvicorn app.main:ap…"    2 weeks ago   Exited (0) 2 weeks ago                                                   admiring_ishizaka
+235694b06dd8   9e55b1d88e34   "uvicorn app.main:ap…"    2 weeks ago   Exited (0) 2 weeks ago                                                   gracious_perlman
+13f20061450e   0514369f8875   "/bin/sh -c '[\"uvico…"   2 weeks ago   Exited (127) 2 weeks ago                                                 fervent_mayer
+335de48d9240   b1ad0277c3f2   "/bin/sh -c '[\"uvico…"   2 weeks ago   Exited (127) 2 weeks ago                                                 optimistic_bassi
+42a9a6ff2093   hello-world    "/hello"                  2 weeks ago   Exited (0) 2 weeks ago                                                   nice_wozniak
+
+Ejecutar el contenedor con un volumen persistente
+
+docker run -d -p 8080:8080 --restart unless-stopped --name microdom -v /var/log/microdom:/app/logs microdom
+
+
+
+
+Con docker compose:
+    docker compose up -d
+    docker compose down
