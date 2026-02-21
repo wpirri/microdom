@@ -41,7 +41,8 @@ CONTAINER ID   IMAGE          COMMAND                   CREATED       STATUS    
 
 Ejecutar el contenedor con un volumen persistente
 
-docker run -d -p 8080:8080 --restart unless-stopped --name microdom -v /var/log/microdom:/app/logs microdom
+docker run -p 8080:8080 -v /var/log/microdom:/app/logs -v /etc:/app/etc microdom
+docker run -d -p 8080:8080 --restart unless-stopped --name microdom -v /var/log/microdom:/app/logs -v /etc:/app/etc microdom
 
 
 

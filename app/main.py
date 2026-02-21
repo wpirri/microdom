@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from app.routers import healt
 from app.routers import cgi_bin
-from logging_config import get_daily_logger
+from app.config_utils import get_config_value
+from app.log_utils import get_daily_logger
 
 logger = get_daily_logger("microdom", "/app/logs/microdom.log")
 

@@ -5,6 +5,7 @@ RUN useradd -m appuser
 
 # Crear directorio de logs dentro del contenedor
 RUN mkdir -p /app/logs
+RUN mkdir -p /app/etc
 
 # Crear directorio de la app
 WORKDIR /app

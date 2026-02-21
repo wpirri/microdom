@@ -1,4 +1,4 @@
-# logging_config.py
+# log.py
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
