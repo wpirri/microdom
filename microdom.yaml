@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microdom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microdom
+  template:
+    metadata:
+      labels:
+        app: microdom
+    spec:
+      containers:
+        - name: microdom
+          image: microdom
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+            - name: etc
+              mountPath: /app/etc
+      volumes:
+        - name: logs
+          hostPath:
+            path: /var/log/microdom
+            type: DirectoryOrCreate
+        - name: etc
+          hostPath:
+            path: /etc
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microdom
+spec:
+  selector:
+    app: microdom
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  type: NodePort
+  
