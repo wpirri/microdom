@@ -9,11 +9,7 @@ router = APIRouter(prefix="/cgi-bin", tags=["cgi"])
 
 @router.post("/infoio.cgi")
 async def infoio(request: Request):
-    # 1. Leer el cuerpo RAW del POST
-    #body_bytes = await request.body()
-    #body = body_bytes.decode(errors="ignore")
-    #logger.info("[infoio.cgi] POST RAW: %s", body)
-
+    # 1. Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
     data = dict(form)
     logger.info(f"[infoio.cgi] FORM={data}")
@@ -73,5 +69,32 @@ async def infoio(request: Request):
         return {"error=1&message=Error de conexion a la base de datos"}
 
 
+@router.get("/abmassign.cgi")
+async def abmassign(request: Request):
+    # 1. Leer el POST
+    #form = await request.form()   # ← parsea x-www-form-urlencoded
+    #data = dict(form)
+    #logger.info(f"[abmassign.cgi] FORM={data}")
+
+    # 2. Leer parámetros GET (query string)
+    query_params = dict(request.query_params)
+    logger.info("[abmassign.cgi] GET params: %s", query_params)
+
+    # 3. Leer headers (variables del navegador)
+    headers = dict(request.headers)
+    logger.info("[abmassign.cgi] Headers: %s", headers)
+
+    #DBHOST=192.168.10.32
+    #DBNAME=DB_DOMPIWEB
+    #DBUSER=dompi_web
+    #DBPASSWORD=dompi_web
+    db_host = get_config_value("/app/etc/dompiweb.conf", "DBHOST")
+    db_name = get_config_value("/app/etc/dompiweb.conf", "DBNAME")
+    db_user = get_config_value("/app/etc/dompiweb.conf", "DBUSER")
+    db_password = get_config_value("/app/etc/dompiweb.conf", "DBPASSWORD")
+    logger.info(f"DB Config: host={db_host} name={db_name} user={db_user} password={'*' * len(db_password) if db_password else None}")
 
 
+
+
+    return {"error=0&message=Ok"}

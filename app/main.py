@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from app.routers import healt
 from app.routers import cgi_bin
 from app.config_utils import get_config_value

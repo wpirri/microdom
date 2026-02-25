@@ -44,9 +44,20 @@ Ejecutar el contenedor con un volumen persistente
 docker run -p 8080:8080 -v /var/log/microdom:/app/logs -v /etc:/app/etc microdom
 docker run -d -p 8080:8080 --restart unless-stopped --name microdom -v /var/log/microdom:/app/logs -v /etc:/app/etc microdom
 
-
-
-
 Con docker compose:
     docker compose up -d
     docker compose down
+
+
+Para subir a GHCR
+
+docker build -t microdom:latest .
+docker tag microdom:latest ghcr.io/wpirri/microdom:latest
+docker push ghcr.io/wpirri/microdom:latest
+
+GHCR PAT: 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
+
+1. 	Deployment → reemplaza al "docker run"
+2. 	Service → reemplaza al -p 8080:8080
+3. 	Volumes (hostPath) → reemplazan a los "-v"
+
