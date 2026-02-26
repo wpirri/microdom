@@ -48,14 +48,15 @@ Con docker compose:
     docker compose up -d
     docker compose down
 
+Para Subit al Git
+    git add .
+    git commit -m "Algun comentario"
+    git push
 
 Para subir a GHCR
-
-docker build -t microdom:latest .
-docker tag microdom:latest ghcr.io/wpirri/microdom:latest
-docker push ghcr.io/wpirri/microdom:latest
-
-GHCR PAT: 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
+    docker build -t microdom:latest .
+    docker tag microdom:latest ghcr.io/wpirri/microdom:latest
+    docker push ghcr.io/wpirri/microdom:latest
 
 1. 	Deployment → reemplaza al "docker run"
 2. 	Service → reemplaza al -p 8080:8080

@@ -5,7 +5,7 @@ from app.routers import cgi_bin
 from app.config_utils import get_config_value
 from app.log_utils import get_daily_logger
 
-logger = get_daily_logger("microdom", "/app/logs/microdom.log")
+#logger = get_daily_logger("microdom", "/app/logs/microdom.log")
 
 app = FastAPI(
     title="Microservicio comunicacion con dispositivos de domotica",
@@ -17,6 +17,6 @@ app.include_router(cgi_bin.router)
 
 @app.get("/")
 def get_root():
-    logger.info("Petición recibida en /")
-    return {"message": "Microservicio de Domotica"}
+    #logger.info("Petición recibida en /")
+    return {"message": "Microservicio de Domotica 1.0.0.0"}
 

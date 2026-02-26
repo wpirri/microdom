@@ -1,60 +1,49 @@
-import mysql.connector
 from mysql.connector import Error
+from app.db_pool import get_conn
+from app.log_utils import get_daily_logger
 
+logger = get_daily_logger("microdom", "/app/logs/microdom.log")
 
-def mysql_connect(host, database, user, password):
-    """
-    Abre una conexión a MySQL y devuelve el objeto connection.
-    """
-    try:
-        conn = mysql.connector.connect(
-            host=host,
-            database=database,
-            user=user,
-            password=password
-        )
-        if conn.is_connected():
-            return conn
-    except Error as e:
-        print(f"Error al conectar a MySQL: {e}")
-        return None
-
-
-def mysql_disconnect(conn):
-    """
-    Cierra la conexión si está abierta.
-    """
-    if conn and conn.is_connected():
-        conn.close()
-
-
-def mysql_execute(conn, query, params=None):
-    """
-    Ejecuta un query INSERT/UPDATE/DELETE.
-    Devuelve True si tuvo éxito.
-    """
+def mysql_execute_simple(query, params=None):
+    conn = get_conn()
+    if not conn:
+        return False
     try:
         cursor = conn.cursor()
         cursor.execute(query, params)
-        conn.commit()
         return True
     except Error as e:
-        print(f"Error ejecutando query: {e}")
+        logger.info(f"Error ejecutando query: {e}")
         return False
     finally:
         cursor.close()
+        conn.close()  # vuelve al pool
 
-
-def mysql_query(conn, query, params=None):
-    """
-    Ejecuta un SELECT y devuelve todas las filas.
-    """
+def mysql_query_simple(query, params=None):
+    conn = get_conn()
+    if not conn:
+        return None
     try:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(query, params)
         return cursor.fetchall()
     except Error as e:
-        print(f"Error ejecutando SELECT: {e}")
+        logger.info(f"Error ejecutando query: {e}")
         return None
     finally:
         cursor.close()
+        conn.close()  # vuelve al pool
+
+def mysql_execute(query, params=None):
+    try:
+        return mysql_execute_simple(query, params)
+    except Exception:
+        # intento 2
+        return mysql_execute_simple(query, params)
+
+def mysql_query(query, params=None):
+    try:
+        return mysql_query_simple(query, params)
+    except Exception:
+        # intento 2
+        return mysql_query_simple(query, params)
