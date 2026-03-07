@@ -2,7 +2,7 @@ from mysql.connector import Error
 from app.db_pool import get_conn
 from app.log_utils import get_daily_logger
 
-logger = get_daily_logger("microdom", "/app/logs/microdom.log")
+logger = get_daily_logger()
 
 def mysql_execute_simple(query, params=None):
     conn = get_conn()
@@ -13,7 +13,7 @@ def mysql_execute_simple(query, params=None):
         cursor.execute(query, params)
         return True
     except Error as e:
-        logger.info(f"Error ejecutando query: {e}")
+        logger.error(f"Error ejecutando query: {e}")
         return False
     finally:
         cursor.close()
@@ -28,7 +28,7 @@ def mysql_query_simple(query, params=None):
         cursor.execute(query, params)
         return cursor.fetchall()
     except Error as e:
-        logger.info(f"Error ejecutando query: {e}")
+        logger.error(f"Error ejecutando query: {e}")
         return None
     finally:
         cursor.close()

@@ -3,7 +3,7 @@ from app.log_utils import get_daily_logger
 from app.config_utils import get_config_value
 from app.mysql_utils import mysql_execute, mysql_query
 
-logger = get_daily_logger("microdom", "/app/logs/microdom.log")
+logger = get_daily_logger()
 
 router = APIRouter(prefix="/cgi-bin", tags=["cgi"])
 
@@ -46,7 +46,9 @@ async def infoio(request: Request):
     query_result = mysql_query(f"SELECT * FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}';")
     #logger.info(f"Query result: {query_result}")
     if query_result:
-        #logger.info("Periférico encontrado")
+        if query_result[0]["Estado"] == 0:
+            logger.info(f"HW: {hw_mac_addr} OFFLINE -> ONLINE")
+        mysql_execute(f"UPDATE TB_DOM_PERIF SET Estado=1, Ultimo_Ok=UNIX_TIMESTAMP() WHERE MAC='{hw_mac_addr}';")
 
 
 

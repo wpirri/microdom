@@ -2,13 +2,13 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
-def get_daily_logger(nombre_log="app", archivo="app.log"):
-    logger = logging.getLogger(nombre_log)
+def get_daily_logger():
+    logger = logging.getLogger("microdom")
     logger.setLevel(logging.INFO)
 
     if not logger.handlers:
         handler = TimedRotatingFileHandler(
-            archivo,
+            "/app/logs/microdom.log",
             when="midnight",
             interval=1,
             backupCount=7,

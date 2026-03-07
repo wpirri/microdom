@@ -1,9 +1,10 @@
 
-def get_config_value(filename, param_name):
+def get_config_value(param_name, default=None):
     """
     Lee un archivo de configuración estilo KEY=VALUE y devuelve el valor
     del parámetro solicitado. Ignora líneas vacías y comentarios (#).
     """
+    filename = "/app/etc/microdom.conf"
     try:
         with open(filename, "r", encoding="utf-8") as f:
             for line in f:
@@ -20,10 +21,10 @@ def get_config_value(filename, param_name):
                     value = value.strip()
 
                     if key == param_name:
-                        return value if value != "" else None
+                        return value if value != "" else default
 
         # Si no se encontró el parámetro
-        return None
+        return default
 
     except FileNotFoundError:
         raise FileNotFoundError(f"El archivo '{filename}' no existe.")

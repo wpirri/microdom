@@ -2,15 +2,15 @@ from mysql.connector import pooling, Error
 from app.config_utils import get_config_value
 from app.log_utils import get_daily_logger
 
-logger = get_daily_logger("microdom", "/app/logs/microdom.log")
+logger = get_daily_logger()
 
 pool = pooling.MySQLConnectionPool(
     pool_name="main_pool",
     pool_size=10,
-    host=get_config_value("/app/etc/dompiweb.conf", "DBHOST"),
-    database=get_config_value("/app/etc/dompiweb.conf", "DBNAME"),
-    user=get_config_value("/app/etc/dompiweb.conf", "DBUSER"),
-    password=get_config_value("/app/etc/dompiweb.conf", "DBPASSWORD"),
+    host=get_config_value("DBHOST"),
+    database=get_config_value("DBNAME"),
+    user=get_config_value("DBUSER"),
+    password=get_config_value("DBPASSWORD"),
     autocommit=True
 )
 
