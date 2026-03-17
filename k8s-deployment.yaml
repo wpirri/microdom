@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: microdom
-          image: microdom
+          image: wpirri/microdom:latest
           ports:
             - containerPort: 8080
           volumeMounts:
@@ -22,6 +22,18 @@ spec:
               mountPath: /app/logs
             - name: etc
               mountPath: /app/etc
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
       volumes:
         - name: logs
           hostPath:
@@ -31,17 +43,3 @@ spec:
           hostPath:
             path: /etc
             type: Directory
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: microdom
-spec:
-  selector:
-    app: microdom
-  ports:
-    - name: http
-      port: 8080
-      targetPort: 8080
-  type: NodePort
-  
