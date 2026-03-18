@@ -1,16 +1,16 @@
 from mysql.connector import pooling, Error
-from app.config_utils import get_config_value
 from app.log_utils import get_daily_logger
+import os
 
 logger = get_daily_logger()
 
 pool = pooling.MySQLConnectionPool(
     pool_name="main_pool",
     pool_size=10,
-    host=get_config_value("DBHOST"),
-    database=get_config_value("DBNAME"),
-    user=get_config_value("DBUSER"),
-    password=get_config_value("DBPASSWORD"),
+    host=os.getenv("DBHOST"),
+    database=os.getenv("DBNAME"),
+    user=os.getenv("DBUSER"),
+    password=os.getenv("DBPASSWORD"),
     autocommit=True
 )
 
