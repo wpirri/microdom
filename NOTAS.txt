@@ -98,6 +98,7 @@ docker run --rm -it \
 
 Kbernetes
 ==========================================================================================
+kubectl get pods
 kubectl get pods -A
 kubectl apply -f k8s-deployment.yaml
 kubectl describe ingress microdom-ingress

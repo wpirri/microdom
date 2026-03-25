@@ -26,8 +26,6 @@ data:
     REMOTE_PORT=443
     REMOTE_PROTO=https
 
-    DBHOST=192.168.10.32
-    DBNAME=DB_DOMPIWEB
 ---
 # ============================================
 # 3. Service (ClusterIP en puerto 8080)
@@ -106,10 +104,30 @@ spec:
           imagePullPolicy: IfNotPresent
 
           # 🔥 Variables de entorno desde el Secret
-          envFrom:
-            - secretRef:
-                name: microdom
+          env:
+            - name: DBHOST
+              valueFrom:
+                secretKeyRef:
+                  name: microdom
+                  key: DBHOST
 
+            - name: DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: microdom
+                  key: DBNAME
+
+            - name: DBUSER
+              valueFrom:
+                secretKeyRef:
+                  name: microdom
+                  key: DBUSER
+
+            - name: DBPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: microdom
+                  key: DBPASSWORD
           ports:
             - containerPort: 8080
 
@@ -164,7 +182,7 @@ metadata:
 type: Opaque
 stringData:
   DBUSER: "dompi_web"
-  DBPASS: "dompi_web"
+  DBPASSWORD: "dompi_web"
   DBHOST: "192.168.10.32"
   DBNAME: "DB_DOMPIWEB"
   
