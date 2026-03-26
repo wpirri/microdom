@@ -37,11 +37,12 @@ metadata:
   labels:
     app: microdom
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: microdom
   ports:
     - name: http
+      nodePort: 30141
       port: 8080
       targetPort: 8080
 ---
@@ -101,7 +102,7 @@ spec:
       containers:
         - name: microdom
           image: ghcr.io/wpirri/microdom:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
 
           # 🔥 Variables de entorno desde el Secret
           env:

@@ -115,3 +115,14 @@ kubectl get pods
 
 kubectl logs microdom-65fd8dff47-7k8zm --tail=200
 kubectl logs microdom-7cb8b86ccf-dvtsx --tail=200
+
+
+kubectl describe pod -l app=microdom
+
+
+Comparar Git con Kubernetes
+==========================================================================================
+skopeo inspect docker://ghcr.io/wpirri/microdom:latest | jq -r '.Digest'
+kubectl get pod microdom-69765d748f-j5jq6 -o jsonpath="{.status.containerStatuses[0].imageID}"
+
+kubectl rollout restart deployment microdom

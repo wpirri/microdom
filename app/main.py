@@ -1,21 +1,19 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
-from app.routers import healt
 from app.routers import cgi_bin
 from app.log_utils import get_daily_logger
-
-#logger = get_daily_logger()
 
 app = FastAPI(
     title="Microservicio comunicacion con dispositivos de domotica",
     version="1.0.0"
 )
 
-app.include_router(healt.router)
 app.include_router(cgi_bin.router)
 
 @app.get("/")
 def get_root():
-    logger.info("Petición recibida en /")
     return {"message": "Microservicio de Domotica 1.0.0.0"}
 
+@app.get("/health")
+def healt():
+    return {"status": "ok"}
