@@ -51,6 +51,7 @@ docker run -it \
   -e DBPASSWORD=dompi_web \
   -e DBHOST=192.168.10.32 \
   -e DBNAME=DB_DOMPIWEB \
+  --name microdom \
   -v /etc/microdom.conf:/app/etc/microdom.conf \
   -v /var/log/microdom:/app/logs \
   -p 8080:8080 microdom
