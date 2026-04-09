@@ -126,3 +126,47 @@ skopeo inspect docker://ghcr.io/wpirri/microdom:latest | jq -r '.Digest'
 kubectl get pod microdom-69765d748f-j5jq6 -o jsonpath="{.status.containerStatuses[0].imageID}"
 
 kubectl rollout restart deployment microdom
+
+==========================================================================================
+Capturar con TCPDUMP
+
+sudo tcpdump -nv tcp port 8080
+
+22:06:40.338307 IP (tos 0x0, ttl 128, id 96, offset 0, flags [DF], proto TCP (6), length 44)
+    192.168.10.174.38036 > 192.168.10.24.8080: Flags [S], cksum 0x0c99 (correct), seq 13802, win 2920, options [mss 1460], length 0
+22:06:40.338481 IP (tos 0x0, ttl 63, id 0, offset 0, flags [DF], proto TCP (6), length 44)
+    192.168.10.24.8080 > 192.168.10.174.38036: Flags [S.], cksum 0x9635 (incorrect -> 0xbf01), seq 441009076, ack 13803, win 64240, options [mss 1460], length 0
+22:06:40.341414 IP (tos 0x0, ttl 128, id 97, offset 0, flags [DF], proto TCP (6), length 40)
+    192.168.10.174.38036 > 192.168.10.24.8080: Flags [.], cksum 0xc647 (correct), ack 1, win 2920, length 0
+22:06:40.382246 IP (tos 0x0, ttl 128, id 98, offset 0, flags [DF], proto TCP (6), length 447)
+    192.168.10.174.38036 > 192.168.10.24.8080: Flags [P.], cksum 0x22e8 (correct), seq 1:408, ack 1, win 2920, length 407: HTTP, length: 407
+        POST /cgi-bin/infoio.cgi HTTP/1.1
+        Host: 192.168.10.24
+        Connection: keep-alive
+        Content-Length: 183
+        User-Agent: Dom32io/1.00 (Microchip;PIC32)
+        Accept: text/html,text/xml
+        Content-Type: application/x-www-form-urlencoded
+
+        ID=c8c9a34a61af&TYP=IO&IO1=1&IO2=1&IO3=0&IO4=1&IO5=0&IO6=0&OUT1=1&OUT2=1&OUT3=0&OUT4=1&CHG=IO1,IO2&ONLINE=1&AT=1.7.3.0(Mar 19 2020 18:15:04)&SDK=3.0.3(8427744)&FW=Feb  6 2026 12:28:06
+22:06:40.382336 IP (tos 0x0, ttl 63, id 52151, offset 0, flags [DF], proto TCP (6), length 40)
+    192.168.10.24.8080 > 192.168.10.174.38036: Flags [.], cksum 0x9631 (incorrect -> 0xd6be), ack 408, win 63833, length 0
+22:06:40.412950 IP (tos 0x0, ttl 63, id 52152, offset 0, flags [DF], proto TCP (6), length 251)
+    192.168.10.24.8080 > 192.168.10.174.38036: Flags [P.], cksum 0x9704 (incorrect -> 0x8639), seq 1:212, ack 408, win 63833, length 211: HTTP, length: 211
+        HTTP/1.1 200 OK
+        date: Thu, 09 Apr 2026 01:06:39 GMT
+        server: uvicorn
+        content-length: 86
+        content-type: application/json
+
+        ["error=0&message=Ok&OUT1=0&OUT3=0&OUT2=0&IO1=1&IO2=0&IO3=0&OUT4=1&IO4=1&IO5=0&IO6=0"]
+22:06:40.417906 IP (tos 0x0, ttl 128, id 99, offset 0, flags [DF], proto TCP (6), length 40)
+    192.168.10.174.38036 > 192.168.10.24.8080: Flags [.], cksum 0xc4b0 (correct), ack 212, win 2709, length 0
+22:06:45.414896 IP (tos 0x0, ttl 63, id 52153, offset 0, flags [DF], proto TCP (6), length 40)
+    192.168.10.24.8080 > 192.168.10.174.38036: Flags [F.], cksum 0x9631 (incorrect -> 0xd5ea), seq 212, ack 408, win 63833, length 0
+22:06:45.426871 IP (tos 0x0, ttl 128, id 105, offset 0, flags [DF], proto TCP (6), length 40)
+    192.168.10.174.38036 > 192.168.10.24.8080: Flags [F.], cksum 0xc4af (correct), seq 408, ack 213, win 2708, length 0
+22:06:45.426971 IP (tos 0x0, ttl 63, id 52154, offset 0, flags [DF], proto TCP (6), length 40)
+    192.168.10.24.8080 > 192.168.10.174.38036: Flags [.], cksum 0x9631 (incorrect -> 0xd5e9), ack 409, win 63833, length 0
+
+=======================================================================================
