@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
-from app.dom_utils import check_hw, analyze_event, get_hw_io_status
+from app.dom_utils import check_hw, analyze_event, get_hw_io_status, change_assign_by_name, get_assign_status
 
 logger = get_daily_logger()
 
@@ -78,24 +78,49 @@ async def abmassign(request: Request):
     # 1. Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
     data = dict(form)
-    logger.info(f"[abmassign.cgi] FORM={data}")
+    #logger.info(f"[abmassign.cgi] FORM={data}")
 
     # 2. Leer parámetros GET (query string)
     request_params = dict(request.query_params)
-    logger.info("[abmassign.cgi] GET params: %s", request_params)
+    #logger.info("[abmassign.cgi] GET params: %s", request_params)
 
     # 3. Leer headers (variables del navegador)
     headers = dict(request.headers)
     logger.info("[abmassign.cgi] Headers: %s", headers)
     # Busco el dispositivo por IP
-    rc = check_hw(None, raddr, 'completar')
-    if rc:
-        logger.info("Periférico encontrado")
+    #rc = check_hw(None, raddr, 'completar')
+    #if rc:
+    #    logger.info("Periférico encontrado")
+    #    return {"error=0&message=Ok"}
+    #else:
+    #    logger.info(f"Periférico {raddr} no encontrado")
+    #    return {f"error=2&message=HW {raddr} no encontrado"}
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"Función solicitada: {funcion}")
+        if funcion == "status":
+            return get_assign_status()
+        else:
+            if funcion == "switch":
+                objeto = request_params.get("Objeto", None)
+                if objeto:
+                    change_assign_by_name(objeto, 3)
+                return {"error=0&message=Ok"}
+            else:
+                if funcion == "on":
+                    objeto = request_params.get("Objeto", None)
+                    if objeto:
+                        change_assign_by_name(objeto, 1)
+                    return {"error=0&message=Ok"}
+                else:
+                    if funcion == "off":
+                        objeto = request_params.get("Objeto", None)
+                        if objeto:
+                            change_assign_by_name(objeto, 2)
+                        return {"error=0&message=Ok"}
+                    else:
+                        logger.info(f"Función desconocida: {funcion}")
+                        return {f"error=3&message=Función desconocida: {funcion}"}
 
 
-
-        
-        return {"error=0&message=Ok"}
-    else:
-        logger.info(f"Periférico {raddr} no encontrado")
-        return {f"error=2&message=HW {raddr} no encontrado"}
+    return {"error=0&message=Ok"}

@@ -146,7 +146,10 @@ spec:
               mountPath: /app/logs
             - name: etc
               mountPath: /app/etc
-
+            - name: html-volume
+              mountPath: /app/html
+            - name: download-volume
+              mountPath: /app/download
           livenessProbe:
             httpGet:
               path: /health
@@ -170,6 +173,14 @@ spec:
           configMap:
             name: microdom-config
 
+        - name: html-volume
+          hostPath:
+            path: /var/lib/microdom/html
+            type: DirectoryOrCreate
+        - name: download-volume
+          hostPath:
+            path: /var/lib/microdom/download
+            type: DirectoryOrCreate
       imagePullSecrets:
         - name: ghcr
 ---

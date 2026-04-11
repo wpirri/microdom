@@ -42,6 +42,8 @@ docker run --rm -it \
   -e DBNAME=DB_DOMPIWEB \
   -v /etc/microdom.conf:/app/etc/microdom.conf \
   -v /var/log/microdom:/app/logs \
+  -v /var/lib/microdom/html:/app/html \
+  -v /var/lib/microdom/download:/app/download \
   -p 8080:8080 microdom
 
 Daemon:
@@ -54,6 +56,8 @@ docker run -it \
   --name microdom \
   -v /etc/microdom.conf:/app/etc/microdom.conf \
   -v /var/log/microdom:/app/logs \
+  -v /var/lib/microdom/html:/app/html \
+  -v /var/lib/microdom/download:/app/download \
   -p 8080:8080 microdom
 
 
@@ -126,6 +130,13 @@ skopeo inspect docker://ghcr.io/wpirri/microdom:latest | jq -r '.Digest'
 kubectl get pod microdom-69765d748f-j5jq6 -o jsonpath="{.status.containerStatuses[0].imageID}"
 
 kubectl rollout restart deployment microdom
+
+==========================================================================================
+Para ver los archivos persistentes
+
+kubectl exec -it deploy/microdom -- sh
+cd /app/logs
+ls -l
 
 ==========================================================================================
 Capturar con TCPDUMP

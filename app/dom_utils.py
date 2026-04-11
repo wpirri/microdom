@@ -117,6 +117,21 @@ def change_assign_by_id(id, accion, parametro=0):
     else:
         logger.warning(f"change_assign_by_id: acción desconocida {accion} para Id={id}")
 
+def change_assign_by_name(name, accion, parametro=0):
+    if accion == 1:
+        logger.info(f"[change_assign_by_name] Encender: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1 WHERE Objeto = '{name}'")
+    elif accion == 2:
+        logger.info(f"[change_assign_by_name] Apagar: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 0 WHERE Objeto = '{name}'")
+    elif accion == 3:
+        logger.info(f"[change_assign_by_name] Alternar: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado) WHERE Objeto = '{name}'")
+    elif accion == 4:
+        logger.info(f"[change_assign_by_name] Pulso de: {parametro}s a: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}) WHERE Objeto = '{name}'")
+    else:
+        logger.warning(f"change_assign_by_name: acción desconocida {accion} para Objeto={name}")
 
 def change_group_by_id(id, accion):
     estado = 0
@@ -203,3 +218,26 @@ def get_hw_io_status(hw_mac_addr):
         return {resp}
     else:
         return {"error=0&message=Ok"}
+
+
+def get_assign_status():
+    query_result = mysql_query("SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data FROM TB_DOM_ASSIGN")
+    if query_result:
+        return {
+            "error": 0,
+            "message": "Ok",
+            "response": [
+                {"Id": item["Id"],
+                 "Objeto": item["Objeto"],
+                 "Port": item["Port"],
+                 "Icono_Apagado": item["Icono_Apagado"],
+                 "Icono_Encendido": item["Icono_Encendido"],
+                 "Estado": item["Estado"],
+                 "Tipo": item["Tipo"],
+                 "Perif_Data": item["Perif_Data"]}
+                for item in query_result
+            ],
+        }
+    else:
+        return {"error": 0, "message": "Ok", "response": []}
+    
