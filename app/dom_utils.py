@@ -226,18 +226,36 @@ def get_assign_status():
         return {
             "error": 0,
             "message": "Ok",
-            "response": [
-                {"Id": item["Id"],
-                 "Objeto": item["Objeto"],
-                 "Port": item["Port"],
-                 "Icono_Apagado": item["Icono_Apagado"],
-                 "Icono_Encendido": item["Icono_Encendido"],
-                 "Estado": item["Estado"],
-                 "Tipo": item["Tipo"],
-                 "Perif_Data": item["Perif_Data"]}
-                for item in query_result
-            ],
+            "response": query_result if query_result else [] ,
         }
     else:
         return {"error": 0, "message": "Ok", "response": []}
     
+def get_assign_info_id(id, planta):
+    if id:
+        query_result = mysql_query(f"SELECT Id,Objeto,Tipo,Icono_Apagado,Icono_Encendido,Grupo_Visual,Planta,Cord_x,Cord_y FROM TB_DOM_ASSIGN WHERE Id = {id};")
+    else:
+        if planta:
+            query_result = mysql_query(f"SELECT Id,Objeto,Tipo,Icono_Apagado,Icono_Encendido,Grupo_Visual,Planta,Cord_x,Cord_y FROM TB_DOM_ASSIGN WHERE Planta = {planta};")
+        else:
+            query_result = mysql_query("SELECT Id,Objeto,Tipo,Icono_Apagado,Icono_Encendido,Grupo_Visual,Planta,Cord_x,Cord_y FROM TB_DOM_ASSIGN;")
+
+    if query_result:
+        return {
+            "error": 0,
+            "message": "Ok",
+            "response": query_result if query_result else [] ,
+        }
+    else:
+        return {"error": 0, "message": "Ok", "response": []}
+
+def get_sys_config():
+    query_result = mysql_query("SELECT * FROM TB_DOM_CONFIG ORDER BY Id DESC LIMIT 1;")
+    if query_result:
+        return {
+            "error": 0,
+            "message": "Ok",
+            "response": query_result[0],
+        }
+    else:
+        return {"error": 0, "message": "Ok", "response": {}}
