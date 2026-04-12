@@ -220,16 +220,15 @@ def get_hw_io_status(hw_mac_addr):
         return {"error=0&message=Ok"}
 
 
-def get_assign_status():
-    query_result = mysql_query("SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data FROM TB_DOM_ASSIGN")
-    if query_result:
-        return {
-            "error": 0,
-            "message": "Ok",
-            "response": query_result if query_result else [] ,
-        }
+def get_assign_status_id(id, planta):
+    if id:
+        query_result = mysql_query(f"SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data FROM TB_DOM_ASSIGN WHERE Id = {id};")
     else:
-        return {"error": 0, "message": "Ok", "response": []}
+        if planta:
+            query_result = mysql_query(f"SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data FROM TB_DOM_ASSIGN WHERE Planta = {planta};")
+        else:  
+            query_result = mysql_query("SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data FROM TB_DOM_ASSIGN")
+    return {"error": 0, "message": "Ok", "response": query_result if query_result else []}
     
 def get_assign_info_id(id, planta):
     if id:
@@ -240,22 +239,8 @@ def get_assign_info_id(id, planta):
         else:
             query_result = mysql_query("SELECT Id,Objeto,Tipo,Icono_Apagado,Icono_Encendido,Grupo_Visual,Planta,Cord_x,Cord_y FROM TB_DOM_ASSIGN;")
 
-    if query_result:
-        return {
-            "error": 0,
-            "message": "Ok",
-            "response": query_result if query_result else [] ,
-        }
-    else:
-        return {"error": 0, "message": "Ok", "response": []}
+    return {"error": 0, "message": "Ok", "response": query_result if query_result else []}
 
 def get_sys_config():
     query_result = mysql_query("SELECT * FROM TB_DOM_CONFIG ORDER BY Id DESC LIMIT 1;")
-    if query_result:
-        return {
-            "error": 0,
-            "message": "Ok",
-            "response": query_result[0],
-        }
-    else:
-        return {"error": 0, "message": "Ok", "response": {}}
+    return {"error": 0, "message": "Ok", "response": query_result[0] if query_result else {}}

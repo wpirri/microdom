@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
-from app.dom_utils import check_hw, analyze_event, get_hw_io_status, change_assign_by_name, get_assign_status, get_assign_info_id, get_sys_config
+from app.dom_utils import check_hw, analyze_event, get_hw_io_status, change_assign_by_name, get_assign_status_id, get_assign_info_id, get_sys_config
 
 logger = get_daily_logger()
 
@@ -99,7 +99,9 @@ async def abmassign(request: Request):
     if funcion:
         logger.info(f"[abmassign.cgi] Funcion: {funcion}")
         if funcion == "status":
-            return get_assign_status()
+            id = request_params.get("Id", None)
+            planta = request_params.get("Planta", None)
+            return get_assign_status_id(id, planta)
         else:
             if funcion == "info":
                 id = request_params.get("Id", None)
