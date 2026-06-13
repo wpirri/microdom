@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
-from app.dom_utils import check_hw, analyze_event, get_hw_io_status, change_assign_by_name, get_assign_status_id, get_assign_info_id, get_sys_config
+from app.dom_utils import add_sys_config, check_hw, analyze_event, get_hw_io_status, change_assign_by_name, get_assign_status_id, get_assign_info_id, get_sys_config
 
 logger = get_daily_logger()
 
@@ -73,7 +73,7 @@ async def infoio(request: Request):
 
 
 @router.get("/abmassign.cgi")
-async def abmassign(request: Request):
+async def abmassign_get(request: Request):
     raddr = request.client.host
     # 1. Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
@@ -133,7 +133,7 @@ async def abmassign(request: Request):
     return {"error=0&message=Ok"}
 
 @router.get("/abmsys.cgi")
-async def abmsys(request: Request):
+async def abmsys_get(request: Request):
     raddr = request.client.host
     # 1. Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
@@ -160,6 +160,39 @@ async def abmsys(request: Request):
         logger.info(f"[abmsys.cgi] Funcion: {funcion}")
         if funcion == "get_current":
             return get_sys_config()
+        
+    logger.info(f"Función desconocida: {funcion}")
+    return {f"error=3&message=Función desconocida: {funcion}"}
 
+@router.post("/abmsys.cgi")
+async def abmsys_post(request: Request):
+    raddr = request.client.host
+    # 1. Leer el POST
+    form = await request.form()   # ← parsea x-www-form-urlencoded
+    data = dict(form)
+    #logger.info(f"[abmassign.cgi] FORM={data}")
 
-    return {"error=0&message=Ok"}
+    # 2. Leer parámetros GET (query string)
+    request_params = dict(request.query_params)
+    #logger.info("[abmassign.cgi] GET params: %s", request_params)
+
+    # 3. Leer headers (variables del navegador)
+    headers = dict(request.headers)
+    logger.info("[abmsys.cgi] Headers: %s", headers)
+    # Busco el dispositivo por IP
+    #rc = check_hw(None, raddr, 'completar')
+    #if rc:
+    #    logger.info("Periférico encontrado")
+    #    return {"error=0&message=Ok"}
+    #else:
+    #    logger.info(f"Periférico {raddr} no encontrado")
+    #    return {f"error=2&message=HW {raddr} no encontrado"}
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmsys.cgi] Funcion: {funcion}")
+        if funcion == "add":
+            return add_sys_config(data)
+        
+    logger.info(f"Función desconocida: {funcion}")
+    return {f"error=3&message=Función desconocida: {funcion}"}
+

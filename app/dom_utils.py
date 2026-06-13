@@ -244,3 +244,38 @@ def get_assign_info_id(id, planta):
 def get_sys_config():
     query_result = mysql_query("SELECT * FROM TB_DOM_CONFIG ORDER BY Id DESC LIMIT 1;")
     return {"error": 0, "message": "Ok", "response": query_result[0] if query_result else {}}
+
+def add_sys_config(data):
+    """
+    Inserta la configuración del sistema.
+    data es un diccionario con los campos de TB_DOM_CONFIG (el Id se genera automáticamente)
+    """
+    from datetime import datetime
+    
+    try:
+        campos = []
+        valores = []
+        
+        if 'Creacion' not in data:
+            campos.append('Creacion')
+            valores.append(f"'{datetime.now().strftime('%Y/%m/%d %H:%M:%S')}'")
+        
+        for key, value in data.items():
+            if key != 'Id':  # Excluir siempre el Id
+                campos.append(key)
+                if isinstance(value, str):
+                    escaped_value = value.replace("'", "''")
+                    valores.append(f"'{escaped_value}'")
+                else:
+                    valores.append(str(value))
+        
+        campos_str = ', '.join(campos)
+        valores_str = ', '.join(valores)
+        query = f"INSERT INTO TB_DOM_CONFIG ({campos_str}) VALUES ({valores_str})"
+        
+        logger.info(f"[add_sys_config] Insertando: {query}")
+        mysql_execute(query)
+        return {"error": 0, "message": "Ok"}
+    except Exception as e:
+        logger.error(f"[add_sys_config] Error: {str(e)}")
+        return {"error": 1, "message": f"Error: {str(e)}"}
