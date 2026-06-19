@@ -47,3 +47,10 @@ def mysql_query(query, params=None):
     except Exception:
         # intento 2
         return mysql_query_simple(query, params)
+    
+def mysql_next_id(table_name, column_name="Id"):
+    result = mysql_query(f"SELECT MAX({column_name}) AS max_id FROM {table_name}")
+    if result and len(result) > 0:
+        return result[0]['max_id'] + 1
+    else:
+        return 1

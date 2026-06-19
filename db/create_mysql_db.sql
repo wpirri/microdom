@@ -19,7 +19,7 @@ DROP TABLE IF EXISTS TB_DOM_CONFIG;
 
 
 CREATE TABLE IF NOT EXISTS TB_DOM_CONFIG (
-Id integer primary key auto_increment,
+Id integer primary key,
 Creacion varchar(32),
 System_Key varchar(256),
 Cloud_Host_1_Address varchar(64),

@@ -1,106 +1,88 @@
 from app.log_utils import get_daily_logger
-from app.mysql_utils import mysql_execute, mysql_query
+from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
 
 logger = get_daily_logger()
 
 """
-        CREATE TABLE IF NOT EXISTS TB_DOM_PERIF (
-            Id integer primary key,
-            MAC varchar(16) NOT NULL,                       -- MAC Address
-            Dispositivo varchar(128) NOT NULL,
-            Tipo integer DEFAULT 0,                         -- 0=Ninguno, 1=Wifi 2=RBPi 3=DSC 4=Garnet
-            Estado integer DEFAULT 0,                       -- 0=Offline
-            Direccion_IP varchar(16) DEFAULT "0.0.0.0",
-            Ultimo_Ok integer DEFAULT 0,
-            Usar_Https integer DEFAULT 0,
-            Habilitar_Wiegand integer DEFAULT 0,
-            Update_Firmware integer DEFAULT 0,
-            Update_WiFi integer DEFAULT 0,
-            Update_Config integer DEFAULT 0,
-            Informacion varchar(1024),
-            UNIQUE INDEX idx_perif_id (Id),
-            UNIQUE INDEX idx_perif_mac (MAC)
-        );
+CREATE TABLE IF NOT EXISTS TB_DOM_ASSIGN (
+    Id integer primary key,
+    Objeto varchar(128) NOT NULL,               -- Nombre para identificarlo en el sistema
+    Dispositivo integer NOT NULL,               -- Discpositivo - Id de TB_DOM_PERIF
+    Port varchar(128) NOT NULL,                 -- Nombre con el que se identifica en el dispositivo
+    Tipo integer NOT NULL,                      -- 0=Output, 1=Input, 2=Analog, 3=Output Alarma, 4=Input Alarma, 5=Output Pulse/Analog_Mult_Div_Valor=Pulse Param, 6=Periferico
+    Estado integer DEFAULT 0,                   -- 1 / 0 para digitales 0 a n para analogicos
+    Estado_HW integer DEFAULT 0,                -- Estado reportado por el HW
+    Perif_Data varchar(128),
+    Icono_Apagado varchar(32),
+    Icono_Encendido varchar(32),
+    Grupo_Visual integer DEFAULT 0,             -- 0=Ninguno 1=Alarma 2=Iluminación 3=Puertas 4=Climatización 5=Cámaras 6=Riego
+    Planta integer DEFAULT 0,
+    Cord_x integer DEFAULT 0,
+    Cord_y integer DEFAULT 0,
+    Coeficiente integer DEFAULT 0,              -- 1=Coeficiente Positivo, -1=Coeficiente Negativo  - rc = Coeficiente * ( (Analog_Mult_Div)?Estado/Analog_Mult_Div_Valor:Estado*Analog_Mult_Div_Valor ) 
+    Analog_Mult_Div integer DEFAULT 0,          -- 0=Multiplicar por valor, 1=Dividir por valor
+    Analog_Mult_Div_Valor integer DEFAULT 1,    -- Parámetro para coeficiente si Tipo=2, Tiempo si Tipo=5
+    Actualizar integer DEFAULT 0,                   -- Enviar update de config al HW por este PORT
+    Flags integer DEFAULT 0,
+    FOREIGN KEY(Dispositivo) REFERENCES TB_DOM_PERIF(Id),
+    FOREIGN KEY(Grupo_Visual) REFERENCES TB_DOM_GRUPO_VISUAL(Id),
+    UNIQUE INDEX idx_assign_id (Id)
+    );
 
-        CREATE TABLE IF NOT EXISTS TB_DOM_ASSIGN (
-        Id integer primary key,
-        Objeto varchar(128) NOT NULL,               -- Nombre para identificarlo en el sistema
-        Dispositivo integer NOT NULL,               -- Discpositivo - Id de TB_DOM_PERIF
-        Port varchar(128) NOT NULL,                 -- Nombre con el que se identifica en el dispositivo
-        Tipo integer NOT NULL,                      -- 0=Output, 1=Input, 2=Analog, 3=Output Alarma, 4=Input Alarma, 5=Output Pulse/Analog_Mult_Div_Valor=Pulse Param, 6=Periferico
-        Estado integer DEFAULT 0,                   -- 1 / 0 para digitales 0 a n para analogicos
-        Estado_HW integer DEFAULT 0,                -- Estado reportado por el HW
-        Perif_Data varchar(128),
-        Icono_Apagado varchar(32),
-        Icono_Encendido varchar(32),
-        Grupo_Visual integer DEFAULT 0,             -- 0=Ninguno 1=Alarma 2=Iluminación 3=Puertas 4=Climatización 5=Cámaras 6=Riego
-        Planta integer DEFAULT 0,
-        Cord_x integer DEFAULT 0,
-        Cord_y integer DEFAULT 0,
-        Coeficiente integer DEFAULT 0,              -- 1=Coeficiente Positivo, -1=Coeficiente Negativo  - rc = Coeficiente * ( (Analog_Mult_Div)?Estado/Analog_Mult_Div_Valor:Estado*Analog_Mult_Div_Valor ) 
-        Analog_Mult_Div integer DEFAULT 0,          -- 0=Multiplicar por valor, 1=Dividir por valor
-        Analog_Mult_Div_Valor integer DEFAULT 1,    -- Parámetro para coeficiente si Tipo=2, Tiempo si Tipo=5
-        Actualizar integer DEFAULT 0,                   -- Enviar update de config al HW por este PORT
-        Flags integer DEFAULT 0,
-        FOREIGN KEY(Dispositivo) REFERENCES TB_DOM_PERIF(Id),
-        FOREIGN KEY(Grupo_Visual) REFERENCES TB_DOM_GRUPO_VISUAL(Id),
-        UNIQUE INDEX idx_assign_id (Id)
-        );
+CREATE TABLE IF NOT EXISTS TB_DOM_GROUP (
+    Id integer primary key,
+    Grupo varchar(128) NOT NULL,
+    Listado_Objetos varchar(256),       -- Id de assign separados por , (comas)
+    Estado integer DEFAULT 0,            -- Define el estado que deben tener los objetos del grupo
+    Icono_Apagado varchar(32),
+    Icono_Encendido varchar(32),
+    Grupo_Visual integer DEFAULT 0,             -- 0=Ninguno 1=Alarma 2=Iluminación 3=Puertas 4=Climatización 5=Cámaras 6=Riego
+    Planta integer DEFAULT 0,
+    Cord_x integer DEFAULT 0,
+    Cord_y integer DEFAULT 0,
+    Actualizar integer DEFAULT 0,
+    UNIQUE INDEX idx_group_id (Id)
+    );
 
-        CREATE TABLE IF NOT EXISTS TB_DOM_GROUP (
-        Id integer primary key,
-        Grupo varchar(128) NOT NULL,
-        Listado_Objetos varchar(256),       -- Id de assign separados por , (comas)
-        Estado integer DEFAULT 0,            -- Define el estado que deben tener los objetos del grupo
-        Icono_Apagado varchar(32),
-        Icono_Encendido varchar(32),
-        Grupo_Visual integer DEFAULT 0,             -- 0=Ninguno 1=Alarma 2=Iluminación 3=Puertas 4=Climatización 5=Cámaras 6=Riego
-        Planta integer DEFAULT 0,
-        Cord_x integer DEFAULT 0,
-        Cord_y integer DEFAULT 0,
-        Actualizar integer DEFAULT 0,
-        UNIQUE INDEX idx_group_id (Id)
-        );
+CREATE TABLE IF NOT EXISTS TB_DOM_FLAG (
+    Id integer primary key,
+    Variable varchar(128) NOT NULL,
+    Valor integer DEFAULT 0,
+    UNIQUE INDEX idx_flag_id (Id)
+    );
 
-        CREATE TABLE IF NOT EXISTS TB_DOM_FLAG (
-        Id integer primary key,
-        Variable varchar(128) NOT NULL,
-        Valor integer DEFAULT 0,
-        UNIQUE INDEX idx_flag_id (Id)
-        );
-
-        CREATE TABLE IF NOT EXISTS TB_DOM_EVENT (
-        Id integer primary key,
-        Evento varchar(128) NOT NULL,
-        Objeto_Origen integer DEFAULT 0,
-        Objeto_Destino integer  DEFAULT 0,      -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-        Grupo_Destino integer  DEFAULT 0,       -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-        Particion_Destino integer  DEFAULT 0,   -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-        Variable_Destino integer  DEFAULT 0,    -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-        ON_a_OFF integer DEFAULT 0,
-        OFF_a_ON integer DEFAULT 0,
-        Enviar integer DEFAULT 0,               -- Evento a enviar 
-                                                --      0=Nada 
-                                                --      1=On 
-                                                --      2=Off 
-                                                --      3=Switch 
-                                                --      4=Pulso a Objeto o Grupo. Si no Variable = Enviar
-        Parametro_Evento integer DEFAULT 0,     -- Se pasa si es Variable o Funcion
-        Condicion_Variable integer DEFAULT 0,             -- Condiciona el evento
-        Condicion_Igualdad integer DEFAULT 0,             -- 0 ==, 1 >, 2 <
-        Condicion_Valor integer DEFAULT 0,                -- Valor de condicion
-        Filtro_Repeticion integer DEFAULT 0,              -- Segundos para ignorar repeticiones
-        Ultimo_Evento  integer DEFAULT 0,
-        Flags integer DEFAULT 0,
-        FOREIGN KEY(Objeto_Origen) REFERENCES TB_DOM_ASSIGN(Id),
-        FOREIGN KEY(Objeto_Destino) REFERENCES TB_DOM_ASSIGN(Id),
-        FOREIGN KEY(Grupo_Destino) REFERENCES TB_DOM_GROUP(Id),
-        FOREIGN KEY(Particion_Destino) REFERENCES TB_DOM_ALARM_PARTICION(Id),
-        FOREIGN KEY(Variable_Destino) REFERENCES TB_DOM_FLAG(Id),
-        UNIQUE INDEX idx_event_id (Id)
-        );
-
+CREATE TABLE IF NOT EXISTS TB_DOM_EVENT (
+    Id integer primary key,
+    Evento varchar(128) NOT NULL,
+    Objeto_Origen integer DEFAULT 0,
+    Objeto_Destino integer  DEFAULT 0,      -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
+    Grupo_Destino integer  DEFAULT 0,       -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
+    Particion_Destino integer  DEFAULT 0,   -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
+    Variable_Destino integer  DEFAULT 0,    -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
+    ON_a_OFF integer DEFAULT 0,
+    OFF_a_ON integer DEFAULT 0,
+    Enviar integer DEFAULT 0,               -- Evento a enviar 
+                                            --      0=Nada 
+                                            --      1=On 
+                                            --      2=Off 
+                                            --      3=Switch 
+                                            --      4=Pulso a Objeto o Grupo. Si no Variable = Enviar
+    Parametro_Evento integer DEFAULT 0,     -- Se pasa si es Variable o Funcion
+    Condicion_Variable integer DEFAULT 0,             -- Condiciona el evento
+    Condicion_Igualdad integer DEFAULT 0,             -- 0 ==, 1 >, 2 <
+    Condicion_Valor integer DEFAULT 0,                -- Valor de condicion
+    Filtro_Repeticion integer DEFAULT 0,              -- Segundos para ignorar repeticiones
+    Ultimo_Evento  integer DEFAULT 0,
+    Flags integer DEFAULT 0,
+    FOREIGN KEY(Objeto_Origen) REFERENCES TB_DOM_ASSIGN(Id),
+    FOREIGN KEY(Objeto_Destino) REFERENCES TB_DOM_ASSIGN(Id),
+    FOREIGN KEY(Grupo_Destino) REFERENCES TB_DOM_GROUP(Id),
+    FOREIGN KEY(Particion_Destino) REFERENCES TB_DOM_ALARM_PARTICION(Id),
+    FOREIGN KEY(Variable_Destino) REFERENCES TB_DOM_FLAG(Id),
+    UNIQUE INDEX idx_event_id (Id)
+    );
 """
+
 def change_assign_by_id(id, accion, parametro=0):
     if accion == 1:
         logger.info(f"[change_assign_by_id] Encender: {id}")
@@ -147,23 +129,6 @@ def change_flag_by_id(id, accion):
     estado = 0
 
     return estado
-
-def check_hw(mac_addr, ip_address, info):
-    # Verificar si el periférico ya existe
-    if mac_addr != None:
-        query_result = mysql_query(f"SELECT * FROM TB_DOM_PERIF WHERE MAC = '{mac_addr}'")
-    else:
-        query_result = mysql_query(f"SELECT * FROM TB_DOM_PERIF WHERE Direccion_IP = '{ip_address}'")
-
-    if query_result:
-        if query_result[0]["Estado"] == 0:
-            logger.info(f"HW: {query_result[0]['Dispositivo']} OFFLINE -> ONLINE")
-        # Actualizar el periférico existente
-        mysql_execute(f"UPDATE TB_DOM_PERIF SET Direccion_IP = '{ip_address}', Ultimo_Ok = UNIX_TIMESTAMP(), Estado = 1, Informacion = '{info}' WHERE MAC = '{mac_addr}'")
-        return query_result[0]['Id'] 
-    else:
-        # HW no existe
-        return None
 
 def check_io_event(mac, io, status):
     logger.info(f"[check_io_event] MAC: {mac} IO: {io} Status: {status}")
@@ -240,42 +205,3 @@ def get_assign_info_id(id, planta):
             query_result = mysql_query("SELECT Id,Objeto,Tipo,Icono_Apagado,Icono_Encendido,Grupo_Visual,Planta,Cord_x,Cord_y FROM TB_DOM_ASSIGN;")
 
     return {"error": 0, "message": "Ok", "response": query_result if query_result else []}
-
-def get_sys_config():
-    query_result = mysql_query("SELECT * FROM TB_DOM_CONFIG ORDER BY Id DESC LIMIT 1;")
-    return {"error": 0, "message": "Ok", "response": query_result[0] if query_result else {}}
-
-def add_sys_config(data):
-    """
-    Inserta la configuración del sistema.
-    data es un diccionario con los campos de TB_DOM_CONFIG (el Id se genera automáticamente)
-    """
-    from datetime import datetime
-    
-    try:
-        campos = []
-        valores = []
-        
-        if 'Creacion' not in data:
-            campos.append('Creacion')
-            valores.append(f"'{datetime.now().strftime('%Y/%m/%d %H:%M:%S')}'")
-        
-        for key, value in data.items():
-            if key != 'Id':  # Excluir siempre el Id
-                campos.append(key)
-                if isinstance(value, str):
-                    escaped_value = value.replace("'", "''")
-                    valores.append(f"'{escaped_value}'")
-                else:
-                    valores.append(str(value))
-        
-        campos_str = ', '.join(campos)
-        valores_str = ', '.join(valores)
-        query = f"INSERT INTO TB_DOM_CONFIG ({campos_str}) VALUES ({valores_str})"
-        
-        logger.info(f"[add_sys_config] Insertando: {query}")
-        mysql_execute(query)
-        return {"error": 0, "message": "Ok"}
-    except Exception as e:
-        logger.error(f"[add_sys_config] Error: {str(e)}")
-        return {"error": 1, "message": f"Error: {str(e)}"}

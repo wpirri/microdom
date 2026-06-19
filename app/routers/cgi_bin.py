@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
-from app.dom_utils import add_sys_config, check_hw, analyze_event, get_hw_io_status, change_assign_by_name, get_assign_status_id, get_assign_info_id, get_sys_config
+from app.dom_utils import analyze_event, get_hw_io_status, change_assign_by_name, get_assign_status_id, get_assign_info_id
+from app.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, update_hardware, delete_hardware
+from app.abm_sys import add_sys_config, get_sys_config
 
 logger = get_daily_logger()
 
@@ -74,10 +76,10 @@ async def infoio(request: Request):
 
 @router.get("/abmassign.cgi")
 async def abmassign_get(request: Request):
-    raddr = request.client.host
+    #raddr = request.client.host
     # 1. Leer el POST
-    form = await request.form()   # ← parsea x-www-form-urlencoded
-    data = dict(form)
+    #form = await request.form()   # ← parsea x-www-form-urlencoded
+    #data = dict(form)
     #logger.info(f"[abmassign.cgi] FORM={data}")
 
     # 2. Leer parámetros GET (query string)
@@ -95,6 +97,7 @@ async def abmassign_get(request: Request):
     #else:
     #    logger.info(f"Periférico {raddr} no encontrado")
     #    return {f"error=2&message=HW {raddr} no encontrado"}
+    
     funcion = request_params.get("funcion", None)
     if funcion:
         logger.info(f"[abmassign.cgi] Funcion: {funcion}")
@@ -134,10 +137,10 @@ async def abmassign_get(request: Request):
 
 @router.get("/abmsys.cgi")
 async def abmsys_get(request: Request):
-    raddr = request.client.host
+    #raddr = request.client.host
     # 1. Leer el POST
-    form = await request.form()   # ← parsea x-www-form-urlencoded
-    data = dict(form)
+    #form = await request.form()   # ← parsea x-www-form-urlencoded
+    #data = dict(form)
     #logger.info(f"[abmassign.cgi] FORM={data}")
 
     # 2. Leer parámetros GET (query string)
@@ -155,6 +158,7 @@ async def abmsys_get(request: Request):
     #else:
     #    logger.info(f"Periférico {raddr} no encontrado")
     #    return {f"error=2&message=HW {raddr} no encontrado"}
+
     funcion = request_params.get("funcion", None)
     if funcion:
         logger.info(f"[abmsys.cgi] Funcion: {funcion}")
@@ -166,7 +170,7 @@ async def abmsys_get(request: Request):
 
 @router.post("/abmsys.cgi")
 async def abmsys_post(request: Request):
-    raddr = request.client.host
+    #raddr = request.client.host
     # 1. Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
     data = dict(form)
@@ -187,6 +191,7 @@ async def abmsys_post(request: Request):
     #else:
     #    logger.info(f"Periférico {raddr} no encontrado")
     #    return {f"error=2&message=HW {raddr} no encontrado"}
+
     funcion = request_params.get("funcion", None)
     if funcion:
         logger.info(f"[abmsys.cgi] Funcion: {funcion}")
@@ -196,3 +201,76 @@ async def abmsys_post(request: Request):
     logger.info(f"Función desconocida: {funcion}")
     return {f"error=3&message=Función desconocida: {funcion}"}
 
+
+@router.get("/abmhw.cgi")
+async def abmhw_get(request: Request):
+    #raddr = request.client.host
+    # 1. Leer el POST
+    #form = await request.form()   # ← parsea x-www-form-urlencoded
+    #data = dict(form)
+    #logger.info(f"[abmassign.cgi] FORM={data}")
+
+    # 2. Leer parámetros GET (query string)
+    request_params = dict(request.query_params)
+    #logger.info("[abmassign.cgi] GET params: %s", request_params)
+
+    # 3. Leer headers (variables del navegador)
+    headers = dict(request.headers)
+    logger.info("[abmhw.cgi] Headers: %s", headers)
+    # Busco el dispositivo por IP
+    #rc = check_hw(None, raddr, 'completar')
+    #if rc:
+    #    logger.info("Periférico encontrado")
+    #    return {"error=0&message=Ok"}
+    #else:
+    #    logger.info(f"Periférico {raddr} no encontrado")
+    #    return {f"error=2&message=HW {raddr} no encontrado"}
+
+    funcion = request_params.get("funcion", None)
+    id = request_params.get("Id", 0)
+    if funcion:
+        logger.info(f"[abmhw.cgi] Funcion: abmhw/{funcion}")
+        if funcion == "get":
+            return get_hardware(id)
+        elif funcion == "delete":
+            return delete_hardware(id)
+        else:
+            return {f"error=99&message=Función: {funcion} no implementadad aún"}
+    else:
+        return get_hardware_list()
+
+@router.post("/abmhw.cgi")
+async def abmhw_post(request: Request):
+    #raddr = request.client.host
+    # 1. Leer el POST
+    form = await request.form()   # ← parsea x-www-form-urlencoded
+    data = dict(form)
+    #logger.info(f"[abmassign.cgi] FORM={data}")
+
+    # 2. Leer parámetros GET (query string)
+    request_params = dict(request.query_params)
+    #logger.info("[abmassign.cgi] GET params: %s", request_params)
+
+    # 3. Leer headers (variables del navegador)
+    headers = dict(request.headers)
+    logger.info("[abmhw.cgi] Headers: %s", headers)
+    # Busco el dispositivo por IP
+    #rc = check_hw(None, raddr, 'completar')
+    #if rc:
+    #    logger.info("Periférico encontrado")
+    #    return {"error=0&message=Ok"}
+    #else:
+    #    logger.info(f"Periférico {raddr} no encontrado")
+    #    return {f"error=2&message=HW {raddr} no encontrado"}
+
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmhw.cgi] Funcion: abmhw/{funcion}")
+        if funcion == "add":
+            return add_hardware(data)
+        elif funcion == "update":
+            return update_hardware(data)
+        else:
+            return {f"error=99&message=Función: {funcion} no implementadad aún"}
+    else:
+        return {f"error=99&message=Función: {funcion} no implementadad aún"}
