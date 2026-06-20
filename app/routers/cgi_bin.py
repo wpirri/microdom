@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
-from app.dom_utils import analyze_event, get_hw_io_status, change_assign_by_name, get_assign_status_id, get_assign_info_id
+from app.dom_utils import analyze_event, get_hw_io_status, get_assign_status_id, get_assign_info_id
 from app.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, update_hardware, delete_hardware
 from app.abm_sys import add_sys_config, get_sys_config
-from app.abm_assign import add_assign, get_assign_list, get_assign, update_assign, delete_assign
+from app.abm_assign import add_assign, get_assign_list, get_assign, update_assign, delete_assign, change_assign_by_name
 from app.abm_event import add_event, get_event_list, get_event, update_event, delete_event
 from app.abm_group import add_group, get_group_list, get_group, update_group, delete_group
 from app.abm_user import add_user, get_user_list, get_user, update_user, delete_user
@@ -19,26 +19,21 @@ router = APIRouter(prefix="/cgi-bin", tags=["cgi"])
 @router.post("/infoio.cgi")
 async def infoio(request: Request):
     raddr = request.client.host
-    # 1. Leer el POST
+    # Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
     data = dict(form)
-    #logger.info(f"[infoio.cgi] FORM={data}")
+    # Información del dispositivo
     hw_mac_addr = data.get("ID", "NULL").upper()
     hw_typ = data.get("TYP", None)
-
-    #ONLINE = data.get("ONLINE", None)
-    OFFLINE = data.get("OFFLINE", None)
     AT = data.get("AT", None)
     SDK = data.get("SDK", None)
     FW = data.get("FW", None)
-
-    # 2. Leer parámetros GET (query string)
+    # Si el dice que estuvo offline
+    OFFLINE = data.get("OFFLINE", None)
+    # Parámetros GET (query string)
     request_params = dict(request.query_params)
-    #logger.info("[infoio.cgi] GET params: %s", request_params)
-
-    # 3. Leer headers (variables del navegador)
+    # Leer headers (variables del navegador)
     headers = dict(request.headers)
-    #logger.info("[infoio.cgi] Headers: %s", headers)
 
     # Busco el dispositivo por MAC
     rc = check_hw(hw_mac_addr, raddr, f"AT:{AT} SDK:{SDK} FW:{FW}")
@@ -77,30 +72,15 @@ async def infoio(request: Request):
         logger.info(f"HW: {hw_mac_addr} no encontrado")
         return {f"error=2&message=HW {hw_mac_addr} no encontrado"}
 
+### ABM de la configuración del sistema
 @router.get("/abmsys.cgi")
 async def abmsys_get(request: Request):
-    #raddr = request.client.host
-    # 1. Leer el POST
-    #form = await request.form()   # ← parsea x-www-form-urlencoded
-    #data = dict(form)
-    #logger.info(f"[abmassign.cgi] FORM={data}")
-
-    # 2. Leer parámetros GET (query string)
+    # Parámetros GET (query string)
     request_params = dict(request.query_params)
-    #logger.info("[abmassign.cgi] GET params: %s", request_params)
-
-    # 3. Leer headers (variables del navegador)
+    # Headers (variables del navegador)
     headers = dict(request.headers)
-    logger.info("[abmsys.cgi] Headers: %s", headers)
-    # Busco el dispositivo por IP
-    #rc = check_hw(None, raddr, 'completar')
-    #if rc:
-    #    logger.info("Periférico encontrado")
-    #    return {"error=0&message=Ok"}
-    #else:
-    #    logger.info(f"Periférico {raddr} no encontrado")
-    #    return {f"error=2&message=HW {raddr} no encontrado"}
 
+    # Me abro por función
     funcion = request_params.get("funcion", None)
     if funcion:
         logger.info(f"[abmsys.cgi] Funcion: {funcion}")
@@ -114,28 +94,15 @@ async def abmsys_get(request: Request):
 
 @router.post("/abmsys.cgi")
 async def abmsys_post(request: Request):
-    #raddr = request.client.host
-    # 1. Leer el POST
+    # Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
     data = dict(form)
-    #logger.info(f"[abmassign.cgi] FORM={data}")
-
-    # 2. Leer parámetros GET (query string)
+    # Parámetros GET (query string)
     request_params = dict(request.query_params)
-    #logger.info("[abmassign.cgi] GET params: %s", request_params)
-
-    # 3. Leer headers (variables del navegador)
+    # Headers (variables del navegador)
     headers = dict(request.headers)
-    logger.info("[abmsys.cgi] Headers: %s", headers)
-    # Busco el dispositivo por IP
-    #rc = check_hw(None, raddr, 'completar')
-    #if rc:
-    #    logger.info("Periférico encontrado")
-    #    return {"error=0&message=Ok"}
-    #else:
-    #    logger.info(f"Periférico {raddr} no encontrado")
-    #    return {f"error=2&message=HW {raddr} no encontrado"}
 
+    # Me abro por función
     funcion = request_params.get("funcion", None)
     if funcion:
         logger.info(f"[abmsys.cgi] Funcion: {funcion}")
@@ -150,28 +117,12 @@ async def abmsys_post(request: Request):
 ### ABM HW
 @router.get("/abmhw.cgi")
 async def abmhw_get(request: Request):
-    #raddr = request.client.host
-    # 1. Leer el POST
-    #form = await request.form()   # ← parsea x-www-form-urlencoded
-    #data = dict(form)
-    #logger.info(f"[abmassign.cgi] FORM={data}")
-
-    # 2. Leer parámetros GET (query string)
+    # Parámetros GET (query string)
     request_params = dict(request.query_params)
-    #logger.info("[abmassign.cgi] GET params: %s", request_params)
-
-    # 3. Leer headers (variables del navegador)
+    # Headers (variables del navegador)
     headers = dict(request.headers)
-    logger.info("[abmhw.cgi] Headers: %s", headers)
-    # Busco el dispositivo por IP
-    #rc = check_hw(None, raddr, 'completar')
-    #if rc:
-    #    logger.info("Periférico encontrado")
-    #    return {"error=0&message=Ok"}
-    #else:
-    #    logger.info(f"Periférico {raddr} no encontrado")
-    #    return {f"error=2&message=HW {raddr} no encontrado"}
 
+    # Me abro por función
     funcion = request_params.get("funcion", None)
     id = request_params.get("Id", 0)
     if funcion:
@@ -187,28 +138,15 @@ async def abmhw_get(request: Request):
 
 @router.post("/abmhw.cgi")
 async def abmhw_post(request: Request):
-    #raddr = request.client.host
-    # 1. Leer el POST
+    # Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
     data = dict(form)
-    #logger.info(f"[abmassign.cgi] FORM={data}")
-
-    # 2. Leer parámetros GET (query string)
+    # Parámetros GET (query string)
     request_params = dict(request.query_params)
-    #logger.info("[abmassign.cgi] GET params: %s", request_params)
-
-    # 3. Leer headers (variables del navegador)
+    # Headers (variables del navegador)
     headers = dict(request.headers)
-    logger.info("[abmhw.cgi] Headers: %s", headers)
-    # Busco el dispositivo por IP
-    #rc = check_hw(None, raddr, 'completar')
-    #if rc:
-    #    logger.info("Periférico encontrado")
-    #    return {"error=0&message=Ok"}
-    #else:
-    #    logger.info(f"Periférico {raddr} no encontrado")
-    #    return {f"error=2&message=HW {raddr} no encontrado"}
 
+    # Me abro por función
     funcion = request_params.get("funcion", None)
     if funcion:
         logger.info(f"[abmhw.cgi] Funcion: abmhw/{funcion}")
@@ -224,28 +162,12 @@ async def abmhw_post(request: Request):
 ### ABM Assign
 @router.get("/abmassign.cgi")
 async def abmassign_get(request: Request):
-    #raddr = request.client.host
-    # 1. Leer el POST
-    #form = await request.form()   # ← parsea x-www-form-urlencoded
-    #data = dict(form)
-    #logger.info(f"[abmassign.cgi] FORM={data}")
-
-    # 2. Leer parámetros GET (query string)
+    # Parámetros GET (query string)
     request_params = dict(request.query_params)
-    #logger.info("[abmassign.cgi] GET params: %s", request_params)
-
-    # 3. Leer headers (variables del navegador)
+    # Headers (variables del navegador)
     headers = dict(request.headers)
-    logger.info("[abmassign.cgi] Headers: %s", headers)
-    # Busco el dispositivo por IP
-    #rc = check_hw(None, raddr, 'completar')
-    #if rc:
-    #    logger.info("Periférico encontrado")
-    #    return {"error=0&message=Ok"}
-    #else:
-    #    logger.info(f"Periférico {raddr} no encontrado")
-    #    return {f"error=2&message=HW {raddr} no encontrado"}
     
+    # Me abro por función
     funcion = request_params.get("funcion", None)
     if funcion:
         logger.info(f"[abmassign.cgi] Funcion: {funcion}")
@@ -277,28 +199,15 @@ async def abmassign_get(request: Request):
 
 @router.post("/abmassign.cgi")
 async def abmassign_post(request: Request):
-    #raddr = request.client.host
-    # 1. Leer el POST
+    # Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
     data = dict(form)
-    #logger.info(f"[abmassign.cgi] FORM={data}")
-
-    # 2. Leer parámetros GET (query string)
+    # Parámetros GET (query string)
     request_params = dict(request.query_params)
-    #logger.info("[abmassign.cgi] GET params: %s", request_params)
-
-    # 3. Leer headers (variables del navegador)
+    # Headers (variables del navegador)
     headers = dict(request.headers)
-    logger.info("[abmassign.cgi] Headers: %s", headers)
-    # Busco el dispositivo por IP
-    #rc = check_hw(None, raddr, 'completar')
-    #if rc:
-    #    logger.info("Periférico encontrado")
-    #    return {"error=0&message=Ok"}
-    #else:
-    #    logger.info(f"Periférico {raddr} no encontrado")
-    #    return {f"error=2&message=HW {raddr} no encontrado"}
 
+    # Me abro por función
     funcion = request_params.get("funcion", None)
     if funcion:
         logger.info(f"[abmassign.cgi] Funcion: {funcion}")
@@ -311,3 +220,147 @@ async def abmassign_post(request: Request):
             return {f"error=3&message=Función desconocida: {funcion}"}
     else:
         return {f"error=3&message=Función no informada"}
+
+### ABM Event
+@router.get("/abmevent.cgi")
+async def abmevent_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmevent.cgi] Funcion: {funcion}")
+        id = request_params.get("Id", None)
+        if funcion == "get":
+            return get_event(id)
+        elif funcion == "delete":
+            return delete_event(id)
+        else:
+            logger.info(f"Función desconocida: {funcion}")
+            return {f"error=3&message=Función desconocida: {funcion}"}
+    else:
+        return get_event_list()
+    
+@router.post("/abmevent.cgi")
+async def abmevent_post(request: Request):
+    # Leer el POST
+    form = await request.form()   # ← parsea x-www-form-urlencoded
+    data = dict(form)
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmevent.cgi] Funcion: {funcion}")
+        if funcion == "add":
+            return add_event(data)
+        elif funcion == "update":
+            return update_event(data)
+        else:
+            logger.info(f"Función desconocida: {funcion}")
+            return {f"error=3&message=Función desconocida: {funcion}"}
+    else:
+        return {f"error=3&message=Función no informada"}
+    
+### ABM Group
+@router.get("/abmgroup.cgi")
+async def abmgroup_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmgroup.cgi] Funcion: {funcion}")
+        id = request_params.get("Id", None)
+        if funcion == "get":
+            return get_group(id)
+        elif funcion == "delete":
+            return delete_group(id)
+        else:
+            logger.info(f"Función desconocida: {funcion}")
+            return {f"error=3&message=Función desconocida: {funcion}"}
+    else:
+        return get_group_list()
+    
+@router.post("/abmgroup.cgi")
+async def abmgroup_post(request: Request):
+    # Leer el POST
+    form = await request.form()   # ← parsea x-www-form-urlencoded
+    data = dict(form)
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmgroup.cgi] Funcion: {funcion}")
+        if funcion == "add":
+            return add_group(data)
+        elif funcion == "update":
+            return update_group(data)
+        else:
+            logger.info(f"Función desconocida: {funcion}")
+            return {f"error=3&message=Función desconocida: {funcion}"}
+    else:
+        return {f"error=3&message=Función no informada"}
+    
+### ABM User
+@router.get("/abmuser.cgi")
+async def abmuser_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmuser.cgi] Funcion: {funcion}")
+        id = request_params.get("Id", None)
+        if funcion == "get":
+            return get_user(id)
+        elif funcion == "delete":
+            return delete_user(id)
+        else:
+            logger.info(f"Función desconocida: {funcion}")
+            return {f"error=3&message=Función desconocida: {funcion}"}
+    else:
+        return get_user_list()
+    
+@router.post("/abmuser.cgi")
+async def abmuser_post(request: Request):
+    # Leer el POST
+    form = await request.form()   # ← parsea x-www-form-urlencoded
+    data = dict(form)
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmuser.cgi] Funcion: {funcion}")
+        if funcion == "add":
+            return add_user(data)
+        elif funcion == "update":
+            return update_user(data)
+        else:
+            logger.info(f"Función desconocida: {funcion}")
+            return {f"error=3&message=Función desconocida: {funcion}"}
+    else:
+        return {f"error=3&message=Función no informada"}
+    
+
+    

@@ -100,3 +100,35 @@ def delete_assign(Id):
     logger.info(f"[delete_assign] Eliminando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
+
+def change_assign_by_id(id, accion, parametro=0):
+    if accion == 1:
+        logger.info(f"[change_assign_by_id] Encender: {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1 WHERE Id = {id}")
+    elif accion == 2:
+        logger.info(f"[change_assign_by_id] Apagar: {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 0 WHERE Id = {id}")
+    elif accion == 3:
+        logger.info(f"[change_assign_by_id] Alternar: {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado) WHERE Id = {id}")
+    elif accion == 4:
+        logger.info(f"[change_assign_by_id] Pulso de: {parametro}s a: {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}) WHERE Id = {id}")
+    else:
+        logger.warning(f"change_assign_by_id: acción desconocida {accion} para Id={id}")
+
+def change_assign_by_name(name, accion, parametro=0):
+    if accion == 1:
+        logger.info(f"[change_assign_by_name] Encender: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1 WHERE Objeto = '{name}'")
+    elif accion == 2:
+        logger.info(f"[change_assign_by_name] Apagar: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 0 WHERE Objeto = '{name}'")
+    elif accion == 3:
+        logger.info(f"[change_assign_by_name] Alternar: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado) WHERE Objeto = '{name}'")
+    elif accion == 4:
+        logger.info(f"[change_assign_by_name] Pulso de: {parametro}s a: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}) WHERE Objeto = '{name}'")
+    else:
+        logger.warning(f"change_assign_by_name: acción desconocida {accion} para Objeto={name}")

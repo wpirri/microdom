@@ -181,3 +181,59 @@ sudo tcpdump -nv tcp port 8080
     192.168.10.24.8080 > 192.168.10.174.38036: Flags [.], cksum 0x9631 (incorrect -> 0xd5e9), ack 409, win 63833, length 0
 
 =======================================================================================
+
+
+==========================================================================================
+== HTTPS
+==========================================================================================
+Generar certificados para HTTPS
+
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+
+==========================================================================================
+Arranque de uvicorn
+
+uvicorn main:app \
+    --host 0.0.0.0 \
+    --port 8443 \
+    --ssl-keyfile /app/certs/key.pem \
+    --ssl-certfile /app/certs/cert.pem
+
+==========================================================================================
+Estructura
+
+/app/certs/cert.pem
+/app/certs/key.pem
+
+==========================================================================================
+start.sh
+
+#!/bin/bash
+uvicorn main:app \
+    --host 0.0.0.0 \
+    --port 8443 \
+    --ssl-keyfile /app/certs/key.pem \
+    --ssl-certfile /app/certs/cert.pem
+
+==========================================================================================
+DockerFile
+
+CMD ["bash", "/app/start.sh"]
+
+==========================================================================================
+Ejecución
+
+docker run --rm -it \
+  -e DBUSER=dompi_web \
+  -e DBPASSWORD=dompi_web \
+  -e DBHOST=192.168.10.32 \
+  -e DBNAME=DB_DOMPIWEB \
+  -v /etc/microdom.conf:/app/etc/microdom.conf \
+  -v /var/log/microdom:/app/logs \
+  -v /var/lib/microdom/html:/app/html \
+  -v /var/lib/microdom/download:/app/download \
+  -v /etc/ssl/microdom/cert.pem:/app/certs/cert.pem \
+  -v /etc/ssl/microdom/key.pem:/app/certs/key.pem \
+  -p 8443:8443 \
+  microdom
+

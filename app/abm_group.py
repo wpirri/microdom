@@ -86,3 +86,8 @@ def delete_group(Id):
     logger.info(f"[delete_group] Eliminando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
+
+def change_group_by_id(id, accion):
+    estado = 0
+
+    return estado
