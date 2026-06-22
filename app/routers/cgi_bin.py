@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
 from app.dom_utils import analyze_event, get_hw_io_status, get_assign_status_id, get_assign_info_id
-from app.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, update_hardware, delete_hardware
-from app.abm_sys import add_sys_config, get_sys_config
-from app.abm_assign import add_assign, get_assign_list, get_assign, update_assign, delete_assign, change_assign_by_name
-from app.abm_event import add_event, get_event_list, get_event, update_event, delete_event
-from app.abm_group import add_group, get_group_list, get_group, update_group, delete_group
-from app.abm_user import add_user, get_user_list, get_user, update_user, delete_user
+from app.abm.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, update_hardware, delete_hardware
+from app.abm.abm_sys import add_sys_config, get_sys_config
+from app.abm.abm_assign import add_assign, get_assign_list, get_assign, update_assign, delete_assign, change_assign_by_name
+from app.abm.abm_event import add_event, get_event_list, get_event, update_event, delete_event
+from app.abm.abm_group import add_group, get_group_list, get_group, update_group, delete_group
+from app.abm.abm_user import add_user, get_user_list, get_user, update_user, delete_user
 
 logger = get_daily_logger()
 
@@ -222,7 +222,7 @@ async def abmassign_post(request: Request):
         return {f"error=3&message=Función no informada"}
 
 ### ABM Event
-@router.get("/abmevent.cgi")
+@router.get("/abmev.cgi")
 async def abmevent_get(request: Request):
     # Parámetros GET (query string)
     request_params = dict(request.query_params)
@@ -232,7 +232,7 @@ async def abmevent_get(request: Request):
     # Me abro por función
     funcion = request_params.get("funcion", None)
     if funcion:
-        logger.info(f"[abmevent.cgi] Funcion: {funcion}")
+        logger.info(f"[abmev.cgi] Funcion: {funcion}")
         id = request_params.get("Id", None)
         if funcion == "get":
             return get_event(id)
@@ -244,7 +244,7 @@ async def abmevent_get(request: Request):
     else:
         return get_event_list()
     
-@router.post("/abmevent.cgi")
+@router.post("/abmev.cgi")
 async def abmevent_post(request: Request):
     # Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
@@ -257,7 +257,7 @@ async def abmevent_post(request: Request):
     # Me abro por función
     funcion = request_params.get("funcion", None)
     if funcion:
-        logger.info(f"[abmevent.cgi] Funcion: {funcion}")
+        logger.info(f"[abmev.cgi] Funcion: {funcion}")
         if funcion == "add":
             return add_event(data)
         elif funcion == "update":

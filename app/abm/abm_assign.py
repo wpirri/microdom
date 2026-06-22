@@ -66,7 +66,7 @@ def add_assign(data):
     valores_str = ', '.join(valores)
     query = f"INSERT INTO TB_DOM_ASSIGN ({campos_str}) VALUES ({valores_str})"
 
-    logger.info(f"[add_assign] Insertando: {query}")
+    #logger.info(f"[add_assign] Insertando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok", "Id": next_id}
 
@@ -88,7 +88,7 @@ def update_assign(data):
     campos_valores_str = ', '.join(campos_valores)
     query = f"UPDATE TB_DOM_ASSIGN SET {campos_valores_str} WHERE Id = {Id}"
 
-    logger.info(f"[update_assign] Actualizando: {query}")
+    #logger.info(f"[update_assign] Actualizando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
 
@@ -97,13 +97,13 @@ def delete_assign(Id):
         return {"error": 1, "message": "Id es requerido"}
 
     query = f"DELETE FROM TB_DOM_ASSIGN WHERE Id = {Id}"
-    logger.info(f"[delete_assign] Eliminando: {query}")
+    #logger.info(f"[delete_assign] Eliminando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
 
 def change_assign_by_id(id, accion, parametro=0):
     if accion == 1:
-        logger.info(f"[change_assign_by_id] Encender: {id}")
+        #logger.info(f"[change_assign_by_id] Encender: {id}")
         mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1 WHERE Id = {id}")
     elif accion == 2:
         logger.info(f"[change_assign_by_id] Apagar: {id}")

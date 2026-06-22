@@ -52,7 +52,7 @@ def add_group(data):
     valores_str = ', '.join(valores)
     query = f"INSERT INTO TB_DOM_GROUP ({campos_str}) VALUES ({valores_str})"
 
-    logger.info(f"[add_group] Insertando: {query}")
+    #logger.info(f"[add_group] Insertando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok", "Id": next_id}
 
@@ -74,7 +74,7 @@ def update_group(data):
     campos_valores_str = ', '.join(campos_valores)
     query = f"UPDATE TB_DOM_GROUP SET {campos_valores_str} WHERE Id = {Id}"
 
-    logger.info(f"[update_group] Actualizando: {query}")
+    #logger.info(f"[update_group] Actualizando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
 
@@ -83,7 +83,7 @@ def delete_group(Id):
         return {"error": 1, "message": "Id es requerido"}
 
     query = f"DELETE FROM TB_DOM_GROUP WHERE Id = {Id}"
-    logger.info(f"[delete_group] Eliminando: {query}")
+    #logger.info(f"[delete_group] Eliminando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
 

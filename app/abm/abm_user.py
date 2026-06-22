@@ -69,7 +69,7 @@ def add_user(data):
     valores_str = ', '.join(valores)
     query = f"INSERT INTO TB_DOM_USER ({campos_str}) VALUES ({valores_str})"
 
-    logger.info(f"[add_user] Insertando: {query}")
+    #logger.info(f"[add_user] Insertando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok", "Id": next_id}
 
@@ -91,7 +91,7 @@ def update_user(data):
     campos_valores_str = ', '.join(campos_valores)
     query = f"UPDATE TB_DOM_USER SET {campos_valores_str} WHERE Id = {Id}"
 
-    logger.info(f"[update_user] Actualizando: {query}")
+    #logger.info(f"[update_user] Actualizando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
 
@@ -100,6 +100,6 @@ def delete_user(Id):
         return {"error": 1, "message": "Id es requerido"}
 
     query = f"DELETE FROM TB_DOM_USER WHERE Id = {Id}"
-    logger.info(f"[delete_user] Eliminando: {query}")
+    #logger.info(f"[delete_user] Eliminando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}

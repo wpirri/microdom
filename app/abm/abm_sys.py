@@ -81,7 +81,7 @@ def add_sys_config(data):
         valores_str = ', '.join(valores)
         query = f"INSERT INTO TB_DOM_CONFIG ({campos_str}) VALUES ({valores_str})"
         
-        logger.info(f"[add_sys_config] Insertando: {query}")
+        #logger.info(f"[add_sys_config] Insertando: {query}")
         mysql_execute(query)
         return {"error": 0, "message": "Ok"}
     except Exception as e:

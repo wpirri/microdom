@@ -72,7 +72,7 @@ def add_event(data):
     valores_str = ', '.join(valores)
     query = f"INSERT INTO TB_DOM_EVENT ({campos_str}) VALUES ({valores_str})"
 
-    logger.info(f"[add_event] Insertando: {query}")
+    #logger.info(f"[add_event] Insertando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok", "Id": next_id}
 
@@ -94,7 +94,7 @@ def update_event(data):
     campos_valores_str = ', '.join(campos_valores)
     query = f"UPDATE TB_DOM_EVENT SET {campos_valores_str} WHERE Id = {Id}"
 
-    logger.info(f"[update_event] Actualizando: {query}")
+    #logger.info(f"[update_event] Actualizando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
 
@@ -103,6 +103,6 @@ def delete_event(Id):
         return {"error": 1, "message": "Id es requerido"}
 
     query = f"DELETE FROM TB_DOM_EVENT WHERE Id = {Id}"
-    logger.info(f"[delete_event] Eliminando: {query}")
+    #logger.info(f"[delete_event] Eliminando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
