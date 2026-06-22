@@ -1,5 +1,7 @@
 #!/bin/sh
 
+docker stop microdom
+
 docker run --rm -it \
   -e DBUSER=dompi_web \
   -e DBPASSWORD=dompi_web \

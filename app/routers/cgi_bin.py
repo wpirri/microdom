@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
 from app.dom_utils import analyze_event, get_hw_io_status, get_assign_status_id, get_assign_info_id
-from app.abm.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, update_hardware, delete_hardware
+from app.abm.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, get_hardware_list_all, update_hardware, delete_hardware
 from app.abm.abm_sys import add_sys_config, get_sys_config
-from app.abm.abm_assign import add_assign, get_assign_list, get_assign, update_assign, delete_assign, change_assign_by_name
+from app.abm.abm_assign import add_assign, get_assign_list, get_assign, get_assign_list_all, update_assign, delete_assign, change_assign_by_name
 from app.abm.abm_event import add_event, get_event_list, get_event, update_event, delete_event
-from app.abm.abm_group import add_group, get_group_list, get_group, update_group, delete_group
-from app.abm.abm_user import add_user, get_user_list, get_user, update_user, delete_user
+from app.abm.abm_group import add_group, get_group_list, get_group, get_group_list_all, update_group, delete_group
+from app.abm.abm_user import add_user, get_user_list, get_user, get_user_list_all, update_user, delete_user
 
 logger = get_daily_logger()
 
@@ -131,6 +131,8 @@ async def abmhw_get(request: Request):
             return get_hardware(id)
         elif funcion == "delete":
             return delete_hardware(id)
+        elif funcion == "listall":
+            return get_hardware_list_all()
         else:
             return {f"error=99&message=Función: {funcion} no implementadad aún"}
     else:
@@ -191,6 +193,8 @@ async def abmassign_get(request: Request):
             return get_assign(id)
         elif funcion == "delete":
             return delete_assign(id)
+        elif funcion == "listall":
+            return get_assign_list_all()
         else:
             logger.info(f"Función desconocida: {funcion}")
             return {f"error=3&message=Función desconocida: {funcion}"}
@@ -285,6 +289,8 @@ async def abmgroup_get(request: Request):
             return get_group(id)
         elif funcion == "delete":
             return delete_group(id)
+        elif funcion == "listall":
+            return get_group_list_all()
         else:
             logger.info(f"Función desconocida: {funcion}")
             return {f"error=3&message=Función desconocida: {funcion}"}
@@ -332,6 +338,8 @@ async def abmuser_get(request: Request):
             return get_user(id)
         elif funcion == "delete":
             return delete_user(id)
+        elif funcion == "listall":
+            return get_user_list_all()
         else:
             logger.info(f"Función desconocida: {funcion}")
             return {f"error=3&message=Función desconocida: {funcion}"}
