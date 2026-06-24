@@ -132,3 +132,11 @@ def change_assign_by_name(name, accion, parametro=0):
         mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}) WHERE Objeto = '{name}'")
     else:
         logger.warning(f"change_assign_by_name: acción desconocida {accion} para Objeto={name}")
+
+def add_assign_to_planta(id, planta):
+    if not id or not planta:
+        return {"error": 1, "message": "Id y Planta son requeridos"}
+    query = f"UPDATE TB_DOM_ASSIGN SET Icono_Apagado = 'lamp0.png',Icono_Encendido = 'lamp1.png', Cord_x = 200, Cord_y = 50, Planta = {planta} WHERE Id = {id}"
+    #logger.info(f"[add_assign_to_planta] Actualizando: {query}")
+    mysql_execute(query)
+    return {"error": 0, "message": "Ok"}

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 docker stop microdom
-
+sleep 3
 docker run --rm -it \
   -e DBUSER=dompi_web \
   -e DBPASSWORD=dompi_web \
