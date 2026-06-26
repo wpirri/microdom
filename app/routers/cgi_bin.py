@@ -4,9 +4,11 @@ from app.dom_utils import analyze_event, get_hw_io_status, get_assign_status_id,
 from app.abm.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, get_hardware_list_all, update_hardware, delete_hardware
 from app.abm.abm_sys import add_sys_config, get_sys_config
 from app.abm.abm_assign import add_assign, get_assign_list, get_assign, get_assign_list_all, update_assign, delete_assign, change_assign_by_name, add_assign_to_planta
-from app.abm.abm_event import add_event, get_event_list, get_event, update_event, delete_event
-from app.abm.abm_group import add_group, get_group_list, get_group, get_group_list_all, update_group, delete_group
+from app.abm.abm_event import add_event, get_event_list, get_event_list_all, get_event, update_event, delete_event
+from app.abm.abm_group import add_group, get_group_list, get_group_list_all, get_group, get_group_list_all, update_group, delete_group
 from app.abm.abm_user import add_user, get_user_list, get_user, get_user_list_all, update_user, delete_user
+from app.abm.abm_at import get_task_list, get_task_list_all, add_task, get_task, update_task, delete_task
+from app.abm.abm_auto import get_auto_list, get_auto_list_all, add_auto, get_auto, update_auto, delete_auto
 
 logger = get_daily_logger()
 
@@ -131,6 +133,8 @@ async def abmhw_get(request: Request):
             return get_hardware(id)
         elif funcion == "delete":
             return delete_hardware(id)
+        elif funcion == "list":
+            return get_hardware_list()
         elif funcion == "listall":
             return get_hardware_list_all()
         else:
@@ -193,6 +197,8 @@ async def abmassign_get(request: Request):
             return get_assign(id)
         elif funcion == "delete":
             return delete_assign(id)
+        elif funcion == "list":
+            return get_assign_list()
         elif funcion == "listall":
             return get_assign_list_all()
         elif funcion == "addassigntoplanta":
@@ -244,6 +250,10 @@ async def abmevent_get(request: Request):
             return get_event(id)
         elif funcion == "delete":
             return delete_event(id)
+        elif funcion == "list":
+            return get_event_list()
+        elif funcion == "listall":
+            return get_event_list_all()
         else:
             logger.info(f"Función desconocida: {funcion}")
             return {f"error=3&message=Función desconocida: {funcion}"}
@@ -291,6 +301,8 @@ async def abmgroup_get(request: Request):
             return get_group(id)
         elif funcion == "delete":
             return delete_group(id)
+        elif funcion == "list":
+            return get_group_list()
         elif funcion == "listall":
             return get_group_list_all()
         else:
@@ -340,6 +352,8 @@ async def abmuser_get(request: Request):
             return get_user(id)
         elif funcion == "delete":
             return delete_user(id)
+        elif funcion == "list":
+            return get_user_list()
         elif funcion == "listall":
             return get_user_list_all()
         else:
@@ -373,4 +387,105 @@ async def abmuser_post(request: Request):
         return {f"error=3&message=Función no informada"}
     
 
+### ABM Task
+@router.get("/abmat.cgi")
+async def abmat_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmat.cgi] Funcion: {funcion}")
+        id = request_params.get("Id", None)
+        if funcion == "get":
+            return get_task(id)
+        elif funcion == "delete":
+            return delete_task(id)
+        elif funcion == "list":
+            return get_task_list()
+        elif funcion == "listall":
+            return get_task_list_all(id)
+        else:
+            logger.info(f"Función desconocida: {funcion}")
+            return {f"error=3&message=Función desconocida: {funcion}"}
+    else:
+        return get_task_list()
     
+@router.post("/abmat.cgi")
+async def abmat_post(request: Request):
+    # Leer el POST
+    form = await request.form()   # ← parsea x-www-form-urlencoded
+    data = dict(form)
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmat.cgi] Funcion: {funcion}")
+        if funcion == "add":
+            return add_task(data)
+        elif funcion == "update":
+            return update_task(data)
+        else:
+            logger.info(f"Función desconocida: {funcion}")
+            return {f"error=3&message=Función desconocida: {funcion}"}
+    else:
+        return {f"error=3&message=Función no informada"}
+
+### ABM Automatizaciones
+@router.get("/abmauto.cgi")
+async def abmauto_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    tipo = request_params.get("Tipo", None)
+    if funcion:
+        logger.info(f"[abmauto.cgi] Funcion: {funcion}")
+        id = request_params.get("Id", None)
+        if funcion == "get":
+            return get_auto(id)
+        elif funcion == "delete":
+            return delete_auto(id)
+        elif funcion == "list":
+            return get_auto_list(tipo)
+        elif funcion == "listall":
+            return get_auto_list_all(tipo)
+        else:
+            logger.info(f"Función desconocida: {funcion}")
+            return {f"error=3&message=Función desconocida: {funcion}"}
+    else:
+        return get_auto_list(tipo)
+    
+@router.post("/abmauto.cgi")
+async def abmauto_post(request: Request):
+    # Leer el POST
+    form = await request.form()   # ← parsea x-www-form-urlencoded
+    data = dict(form)
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[abmauto.cgi] Funcion: {funcion}")
+        if funcion == "add":
+            return add_auto(data)
+        elif funcion == "update":
+            return update_auto(data)
+        else:
+            logger.info(f"Función desconocida: {funcion}")
+            return {f"error=3&message=Función desconocida: {funcion}"}
+    else:
+        return {f"error=3&message=Función no informada"}
