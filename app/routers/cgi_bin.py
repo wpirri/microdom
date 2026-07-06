@@ -10,6 +10,7 @@ from app.abm.abm_user import add_user, get_user_list, get_user, get_user_list_al
 from app.abm.abm_at import get_task_list, get_task_list_all, add_task, get_task, update_task, delete_task
 from app.abm.abm_auto import get_auto_list, get_auto_list_all, add_auto, get_auto, update_auto, delete_auto
 from app.abm.abm_touch import add_touch, delete_touch, get_touch, get_touch_list, get_touch_list_all, update_touch
+from app.hw_utils import get_touch_download_list
 
 logger = get_daily_logger()
 
@@ -519,7 +520,7 @@ async def abmtouch_get(request: Request):
         elif funcion == "add":
             return add_touch(id, pantalla, boton)
         else:
-            logger.info(f"[GET abmauto] Función desconocida: {funcion}")
+            logger.info(f"[GET abmtouch] Función desconocida: {funcion}")
             return {f"error=3&message=Función desconocida: {funcion}"}
     else:
         return get_touch_list(id, pantalla)
@@ -545,3 +546,35 @@ async def abmtouch_post(request: Request):
             return {f"error=3&message=Función desconocida: {funcion}"}
     else:
         return {f"error=3&message=Función no informada"}
+
+### Configuracion de HW
+@router.get("/hwconfig.cgi")
+async def hwconfig_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[hwconfig.cgi] Funcion: {funcion}")
+
+    return get_touch_download_list(request.client.host)
+
+@router.post("/hwconfig.cgi")
+async def hwconfig_post(request: Request):
+    # Leer el POST
+    form = await request.form()   # ← parsea x-www-form-urlencoded
+    data = dict(form)
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    if funcion:
+        logger.info(f"[hwconfig.cgi] Funcion: {funcion}")
+
+    return {f"error=0&message=Ok"}
