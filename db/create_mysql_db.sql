@@ -289,7 +289,7 @@ UNIQUE INDEX idx_at_id (Id)
 CREATE TABLE IF NOT EXISTS TB_DOM_AUTO (
 Id integer primary key,
 Objeto varchar(128) NOT NULL,               -- Nombre para identificarlo en el sistema
-Tipo integer default 0,                     -- 0 = Riego 1 = Calefaccion 2 = Aire acondicionado 3 = Fotocelula
+Tipo integer default 0,                     -- 0 = Nada 1 = Riego 2 = Calefaccion 3 = Aire acondicionado 4 = Fotocelula
 Objeto_Sensor integer default 0,             -- Discpositivo - Id de input de TB_DOM_ASSIGN
 Objeto_Salida integer default 0,             -- Discpositivo - Id de TB_DOM_ASSIGN
 Grupo_Salida integer default 0,              -- Grupo - Id de TB_DOM_GROUP

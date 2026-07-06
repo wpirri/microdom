@@ -43,10 +43,11 @@ def get_touch_list(id, pantalla):
                 f"WHERE Dispositivo = {id} "
                 "GROUP BY Pantalla ORDER BY Pantalla;")
     else:
-        query = """SELECT Id, Dispositivo, Direccion_IP, Estado "
-            "FROM TB_DOM_PERIF "
-            "WHERE Id > 0 AND Tipo = 5 "
-            "ORDER BY Dispositivo ASC;"""
+        query = """SELECT Id, Dispositivo, Direccion_IP, Estado 
+            FROM TB_DOM_PERIF 
+            WHERE Id > 0 AND Tipo = 5 
+            ORDER BY Dispositivo ASC;"""
+    #logger.info(f"[get_touch_list] Ejecutando: {query}")
     query_result = mysql_query(query);
     return {"error": 0, "message": "Ok", "response": query_result}  
 
@@ -58,38 +59,26 @@ def get_touch(id, pantalla, boton):
     query_result = mysql_query(f"SELECT * FROM TB_DOM_TOUCH WHERE Dispositivo = {id} AND Pantalla = {pantalla} AND Boton = {boton};")
     return {"error": 0, "message": "Ok", "response": query_result}
 
-def add_touch(data):
-    next_id = mysql_next_id('TB_DOM_TOUCH')
-    if next_id in (None, ''):
-        next_id = 1
-    data['Id'] = next_id
-
-    campos = []
-    valores = []
-    for key, value in data.items():
-        campos.append(key)
-        if isinstance(value, str):
-            escaped_value = value.replace("'", "''")
-            valores.append(f"'{escaped_value}'")
-        else:
-            valores.append(str(value))
-
-    campos_str = ', '.join(campos)
-    valores_str = ', '.join(valores)
-    query = f"INSERT INTO TB_DOM_TOUCH ({campos_str}) VALUES ({valores_str})"
-
+def add_touch(id, pantalla, boton):
+    query = f"INSERT INTO TB_DOM_TOUCH(Dispositivo, Pantalla, Boton) VALUES({id}, {pantalla}, {boton})"
     #logger.info(f"[add_touch] Insertando: {query}")
     mysql_execute(query)
-    return {"error": 0, "message": "Ok", "Id": next_id}
+    return {"error": 0, "message": "Ok"}
 
 def update_touch(data):
-    Id = data.get('Id')
-    if not Id:
-        return {"error": 1, "message": "Id es requerido"}
+    Dispositivo = data.get('Dispositivo')
+    Pantalla = data.get('Pantalla')
+    Boton = data.get('Boton')
+    if not Dispositivo:
+        return {"error": 1, "message": "Dispositivo es requerido"}
+    if not Pantalla:
+        return {"error": 1, "message": "Pantalla es requerida"}
+    if not Boton:
+        return {"error": 1, "message": "Boton es requerido"}
 
     campos_valores = []
     for key, value in data.items():
-        if key == 'Id':
+        if key == 'Id' or key == 'Dispositivo' or key == 'Pantalla' or key == 'Boton':
             continue
         if isinstance(value, str):
             escaped_value = value.replace("'", "''")
@@ -98,17 +87,23 @@ def update_touch(data):
             campos_valores.append(f"{key} = {value}")
 
     campos_valores_str = ', '.join(campos_valores)
-    query = f"UPDATE TB_DOM_TOUCH SET {campos_valores_str} WHERE Id = {Id}"
+    query = f"UPDATE TB_DOM_TOUCH SET {campos_valores_str} WHERE Dispositivo = {Dispositivo} AND Pantalla = {Pantalla} AND Boton = {Boton}"
 
     #logger.info(f"[update_touch] Actualizando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
 
-def delete_touch(Id):
-    if not Id:
+def delete_touch(Id, pantalla, boton):
+    if Id:
+        if pantalla:
+            if boton:
+                query = f"DELETE FROM TB_DOM_TOUCH WHERE Dispositivo = {Id} AND Pantalla = {pantalla} AND Boton = {boton}"
+            else:
+                query = f"DELETE FROM TB_DOM_TOUCH WHERE Dispositivo = {Id} AND Pantalla = {pantalla}"
+        else:
+            query = f"DELETE FROM TB_DOM_TOUCH WHERE Dispositivo = {Id}"
+    else:
         return {"error": 1, "message": "Id es requerido"}
-
-    query = f"DELETE FROM TB_DOM_TOUCH WHERE Id = {Id}"
     #logger.info(f"[delete_touch] Eliminando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}

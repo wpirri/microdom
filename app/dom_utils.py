@@ -1,9 +1,29 @@
 from app.log_utils import get_daily_logger
 from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
+from app.abm.abm_assign import change_assign_by_id
 
 logger = get_daily_logger()
 
 """
+CREATE TABLE IF NOT EXISTS TB_DOM_PERIF (
+Id integer primary key,
+MAC varchar(16) NOT NULL,                       -- MAC Address
+Dispositivo varchar(128) NOT NULL,
+Tipo integer DEFAULT 0,                         -- 0=Ninguno, 1=Wifi 2=RBPi 3=DSC 4=Garnet
+Estado integer DEFAULT 0,                       -- 0=Offline
+Direccion_IP varchar(16) DEFAULT "0.0.0.0",
+Ultimo_Ok integer DEFAULT 0,
+Usar_Https integer DEFAULT 0,
+Habilitar_Wiegand integer DEFAULT 0,
+Actualizar integer DEFAULT 0,
+Update_Firmware integer DEFAULT 0,
+Update_WiFi integer DEFAULT 0,
+Update_Config integer DEFAULT 0,
+Informacion varchar(1024),
+UNIQUE INDEX idx_perif_id (Id),
+UNIQUE INDEX idx_perif_mac (MAC)
+);
+
 CREATE TABLE IF NOT EXISTS TB_DOM_ASSIGN (
     Id integer primary key,
     Objeto varchar(128) NOT NULL,               -- Nombre para identificarlo en el sistema
@@ -27,28 +47,6 @@ CREATE TABLE IF NOT EXISTS TB_DOM_ASSIGN (
     FOREIGN KEY(Dispositivo) REFERENCES TB_DOM_PERIF(Id),
     FOREIGN KEY(Grupo_Visual) REFERENCES TB_DOM_GRUPO_VISUAL(Id),
     UNIQUE INDEX idx_assign_id (Id)
-    );
-
-CREATE TABLE IF NOT EXISTS TB_DOM_GROUP (
-    Id integer primary key,
-    Grupo varchar(128) NOT NULL,
-    Listado_Objetos varchar(256),       -- Id de assign separados por , (comas)
-    Estado integer DEFAULT 0,            -- Define el estado que deben tener los objetos del grupo
-    Icono_Apagado varchar(32),
-    Icono_Encendido varchar(32),
-    Grupo_Visual integer DEFAULT 0,             -- 0=Ninguno 1=Alarma 2=Iluminación 3=Puertas 4=Climatización 5=Cámaras 6=Riego
-    Planta integer DEFAULT 0,
-    Cord_x integer DEFAULT 0,
-    Cord_y integer DEFAULT 0,
-    Actualizar integer DEFAULT 0,
-    UNIQUE INDEX idx_group_id (Id)
-    );
-
-CREATE TABLE IF NOT EXISTS TB_DOM_FLAG (
-    Id integer primary key,
-    Variable varchar(128) NOT NULL,
-    Valor integer DEFAULT 0,
-    UNIQUE INDEX idx_flag_id (Id)
     );
 
 CREATE TABLE IF NOT EXISTS TB_DOM_EVENT (
@@ -133,9 +131,27 @@ def get_hw_io_status(hw_mac_addr):
     query_result = mysql_query(f"SELECT Port, Estado FROM TB_DOM_ASSIGN WHERE Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}')")
     if query_result:
         resp += "&" + "&".join([f"{item['Port']}={item['Estado']}" for item in query_result])
-        return {resp}
+        return resp
     else:
-        return {"error=0&message=Ok"}
+        return "error=0&message=Ok"
+
+def get_hw_update_data(hw_mac_addr):
+    resp = ""
+    query_result = mysql_query(f"SELECT Update_Firmware, Update_WiFi, Update_Config FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}'")
+    if query_result:
+        if query_result[0]['Update_Firmware'] == 1:
+            logger.info(f"Solicitando actualizacion de firmware a: {hw_mac_addr}")
+            resp = "&update=firmware"
+            mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_Firmware = 0 WHERE MAC = '{hw_mac_addr}'")
+        elif query_result[0]['Update_WiFi'] == 1:
+            logger.info(f"Solicitando actualizacion de WiFi a: {hw_mac_addr}")
+            resp = "&update=wifi"
+            mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_WiFi = 0 WHERE MAC = '{hw_mac_addr}'")
+        elif query_result[0]['Update_Config'] == 1:
+            logger.info(f"Solicitando actualizacion de configuracion a: {hw_mac_addr}")
+            resp = "&update=config"
+            mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_Config = 0 WHERE MAC = '{hw_mac_addr}'")
+    return resp
 
 
 def get_assign_status_id(id, planta):
