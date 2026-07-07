@@ -10,7 +10,7 @@ from app.abm.abm_user import add_user, get_user_list, get_user, get_user_list_al
 from app.abm.abm_at import get_task_list, get_task_list_all, add_task, get_task, update_task, delete_task
 from app.abm.abm_auto import get_auto_list, get_auto_list_all, add_auto, get_auto, update_auto, delete_auto
 from app.abm.abm_touch import add_touch, delete_touch, get_touch, get_touch_list, get_touch_list_all, update_touch
-from app.hw_utils import get_touch_download_list
+from app.hw_utils import get_touch_download_list, get_touch_download_screen
 
 logger = get_daily_logger()
 
@@ -556,11 +556,11 @@ async def hwconfig_get(request: Request):
     headers = dict(request.headers)
 
     # Me abro por función
-    funcion = request_params.get("funcion", None)
-    if funcion:
-        logger.info(f"[hwconfig.cgi] Funcion: {funcion}")
-
-    return get_touch_download_list(request.client.host)
+    screen = request_params.get("screen", None)
+    if screen:
+        return get_touch_download_screen(request.client.host, screen)
+    else:
+        return get_touch_download_list(request.client.host)
 
 @router.post("/hwconfig.cgi")
 async def hwconfig_post(request: Request):
