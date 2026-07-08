@@ -106,3 +106,19 @@ def delete_hardware(Id):
     #logger.info(f"[delete_hardware] Eliminando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
+
+def set_hardware_update_flag(Id, firmware, wifi, config):
+    if not Id:
+        return {"error": 1, "message": "Id es requerido"}
+
+    if firmware is None:
+        firmware = 0
+    if wifi is None:
+        wifi = 0
+    if config is None:
+        config = 0
+
+    query = f"UPDATE TB_DOM_PERIF SET Update_Firmware = {firmware}, Update_WiFi = {wifi}, Update_Config = {config} WHERE Id = {Id}"
+    #logger.info(f"[set_hardware_update_flag] Query: {query}")
+    mysql_execute(query)
+    return {"error": 0, "message": "Ok"}

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
 from app.dom_utils import analyze_event, get_hw_io_status, get_assign_status_id, get_assign_info_id, get_hw_update_data
-from app.abm.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, get_hardware_list_all, update_hardware, delete_hardware
+from app.abm.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, get_hardware_list_all, update_hardware, delete_hardware, set_hardware_update_flag
 from app.abm.abm_sys import add_sys_config, get_sys_config
 from app.abm.abm_assign import add_assign, get_assign_list, get_assign, get_assign_list_all, update_assign, delete_assign, change_assign_by_name, add_assign_to_planta
 from app.abm.abm_event import add_event, get_event_list, get_event_list_all, get_event, update_event, delete_event
@@ -139,6 +139,12 @@ async def abmhw_get(request: Request):
             return get_hardware_list()
         elif funcion == "listall":
             return get_hardware_list_all()
+        elif funcion == "update_firmware":
+            return set_hardware_update_flag(id, 1, 0, 0)
+        elif funcion == "update_wifi":
+            return set_hardware_update_flag(id, 0, 1, 0)
+        elif funcion == "update_config":
+            return set_hardware_update_flag(id, 0, 0, 1)
         else:
             logger.info(f"[GET abmhw] Función desconocida: {funcion}")
             return {f"error=99&message=Función: {funcion} no implementadad aún"}

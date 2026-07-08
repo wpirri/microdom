@@ -88,8 +88,7 @@ def update_touch(data):
 
     campos_valores_str = ', '.join(campos_valores)
     query = f"UPDATE TB_DOM_TOUCH SET {campos_valores_str} WHERE Dispositivo = {Dispositivo} AND Pantalla = {Pantalla} AND Boton = {Boton}"
-
-    #logger.info(f"[update_touch] Actualizando: {query}")
+    #logger.info(f"[update_touch] Query: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
 
