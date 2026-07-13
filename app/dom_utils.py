@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS TB_DOM_EVENT (
 """
 
 def check_io_event(mac, io, status):
-    logger.info(f"[check_io_event] MAC: {mac} IO: {io} Status: {status}")
+    logger.info(f"[check_io_event] EVENTO: HW: {mac} Port: {io} Status: {status}")
     cambio = "OFF_a_ON" if str(status) == "1" else "ON_a_OFF"
     query = (
         "SELECT EV.Enviar, EV.Objeto_Destino, EV.Grupo_Destino, EV.Particion_Destino, "
@@ -98,19 +98,21 @@ def check_io_event(mac, io, status):
         return None
 
     for i in range(0, len(query_result)):
-        logger.info(f"[check_io_event] Evento: {i} - Accion: {query_result[i]['Objeto_Destino']}, {query_result[i]['Enviar']}")
-        # TODO: procesar cada evento según EV.Enviar, Objeto_Destino, Grupo_Destino, etc.
         if query_result[i]['Objeto_Destino']:
+            logger.info(f"[check_io_event] ACCION: Enviar: {query_result[i]['Enviar']} a Objeto: {query_result[i]['Objeto_Destino']}")
             change_assign_by_id(query_result[i]['Objeto_Destino'], query_result[i]['Enviar'])
             pass
         if query_result[i]['Grupo_Destino']:
-            # Procesar evento para grupo
+            logger.info(f"[check_io_event] ACCION: Enviar: {query_result[i]['Enviar']} a Grupo: {query_result[i]['Grupo_Destino']}")
+            # TODO: Procesar evento para grupo
             pass
         if query_result[i]['Particion_Destino']:
-            # Procesar evento para partición
+            logger.info(f"[check_io_event] ACCION: Enviar: {query_result[i]['Enviar']} a Particion: {query_result[i]['Particion_Destino']}")
+            # TODO: Procesar evento para partición
             pass
         if query_result[i]['Variable_Destino']:
-            # Procesar evento para variable
+            logger.info(f"[check_io_event] ACCION: Enviar: {query_result[i]['Enviar']} a Variable: {query_result[i]['Variable_Destino']}")
+            # TODO: Procesar evento para variable
             pass
 
 
@@ -118,7 +120,7 @@ def check_io_event(mac, io, status):
 
 def analyze_event(mac, changes, io1, io2, io3, io4, io5, io6, io7, io8, out1, out2, out3, out4, out5, out6, out7, out8):
     if changes != None:
-        logger.info(f"[analyze_event] MAC: {mac} Cambios: {changes}")
+        #logger.info(f"[analyze_event] MAC: {mac} Cambios: {changes}")
         for i in range(1, 9):
             if f"IO{i}" in changes:
                 check_io_event(mac, f"IO{i}", eval(f"io{i}"))
@@ -128,7 +130,7 @@ def analyze_event(mac, changes, io1, io2, io3, io4, io5, io6, io7, io8, out1, ou
 def get_hw_io_status(hw_mac_addr):
     resp = "error=0&message=Ok"
 
-    query_result = mysql_query(f"SELECT Port, Estado FROM TB_DOM_ASSIGN WHERE Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}')")
+    query_result = mysql_query(f"SELECT Port, Estado FROM TB_DOM_ASSIGN WHERE (Tipo = 0 OR Tipo = 3 OR Tipo = 5) AND Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}')")
     if query_result:
         resp += "&" + "&".join([f"{item['Port']}={item['Estado']}" for item in query_result])
         return resp

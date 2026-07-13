@@ -63,15 +63,12 @@ async def infoio(request: Request):
 
             analyze_event(hw_mac_addr, CHG, IO1, IO2, IO3, IO4, IO5, IO6, IO7, IO8, OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8)
 
-
             return {get_hw_io_status(hw_mac_addr) + get_hw_update_data(hw_mac_addr)}
+        elif hw_typ == "TOUCH":
+            return {"error=0&message=Ok" + get_hw_update_data(hw_mac_addr)}
         else:
-            if hw_typ == "TOUCH":
-
-                return {"error=0&message=Ok" + get_hw_update_data(hw_mac_addr)}
-            else:
-                logger.info(f"HW: {hw_mac_addr} tipo desconocido {hw_typ}")
-                return {f"error=3&message=HW {hw_mac_addr} tipo desconocido {hw_typ}"}
+            logger.info(f"HW: {hw_mac_addr} tipo desconocido {hw_typ}")
+            return {f"error=3&message=HW {hw_mac_addr} tipo desconocido {hw_typ}"}
     else:
         logger.info(f"HW: {hw_mac_addr} no encontrado")
         return {f"error=2&message=HW {hw_mac_addr} no encontrado"}

@@ -82,7 +82,7 @@ def get_touch_download_screen(ip_adddr, screen_nro):
     query += f"WHERE P.Id = T.Dispositivo AND A.Id = T.Objeto  AND P.Direccion_IP = '{ip_adddr}' AND T.Pantalla = {screen_nro} "
     query += "ORDER BY T.Boton ASC"
 
-    logger.info(f"get_touch_download_screen: query: {query}")
+    #logger.info(f"get_touch_download_screen: query: {query}")
 
     query_result = mysql_query(query)
     if query_result:
