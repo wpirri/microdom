@@ -1,3 +1,9 @@
+==========================================================================================
+Servicio de domotica domiciliario
+Se ejecuta en forma local en el hogar y coordina la operaciones de los disositivos de
+interface de domotica, teclas, display, actuadores, sensores, etc.
+==========================================================================================
+
 Crear entorno virtual:
     python -m venv microdom
 
