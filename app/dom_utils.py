@@ -1,6 +1,7 @@
 from app.log_utils import get_daily_logger
 from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
 from app.abm.abm_assign import change_assign_by_id
+from app.abm.abm_group import change_group_by_id
 
 logger = get_daily_logger()
 
@@ -104,7 +105,7 @@ def check_io_event(mac, io, status):
             pass
         if query_result[i]['Grupo_Destino']:
             logger.info(f"[check_io_event] ACCION: Enviar: {query_result[i]['Enviar']} a Grupo: {query_result[i]['Grupo_Destino']}")
-            # TODO: Procesar evento para grupo
+            change_group_by_id(query_result[i]['Grupo_Destino'], query_result[i]['Enviar'])
             pass
         if query_result[i]['Particion_Destino']:
             logger.info(f"[check_io_event] ACCION: Enviar: {query_result[i]['Enviar']} a Particion: {query_result[i]['Particion_Destino']}")

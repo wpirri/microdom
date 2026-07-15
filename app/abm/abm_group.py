@@ -1,5 +1,6 @@
 from app.log_utils import get_daily_logger
 from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
+from app.abm.abm_assign import change_assign_by_id
 
 logger = get_daily_logger()
 
@@ -87,7 +88,35 @@ def delete_group(Id):
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
 
-def change_group_by_id(id, accion):
-    estado = 0
+def change_group_by_id(id, accion, parametro=0):
+    query_result = mysql_query(f"SELECT Estado, Listado_Objetos FROM TB_DOM_GROUP WHERE Id = {id};");
+    estado_grupo = query_result[0]['Estado']
+    objetos = query_result[0]['Listado_Objetos'].split(",")
 
-    return estado
+    if accion == 1:
+        logger.info(f"[change_group_by_id] Encender: {id}")
+        estado_grupo = 1
+    elif accion == 2:
+        logger.info(f"[change_group_by_id] Apagar: {id}")
+        estado_grupo = 0
+    elif accion == 3:
+        logger.info(f"[change_group_by_id] Alternar: {id}")
+        estado_grupo = 1 - estado_grupo
+    elif accion == 4:
+        logger.info(f"[change_group_by_id] Pulso de: {parametro}s a: {id} - NO IMPLEMENTADO")
+
+    else:
+        logger.warning(f"change_group_by_id: acción desconocida {accion} para Id={id}")
+
+    for obj in objetos:
+        if obj:
+            if estado_grupo == 1:
+                logger.info(f"[change_group_by_id] Encender: {obj}")
+                change_assign_by_id(obj, 1)
+            elif estado_grupo == 0:
+                logger.info(f"[change_group_by_id] Apagar: {obj}")
+                change_assign_by_id(obj, 2)
+
+    mysql_execute(f"UPDATE TB_DOM_GROUP SET Estado = {estado_grupo} WHERE Id = {id};")
+
+    return len(objetos)

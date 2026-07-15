@@ -103,7 +103,7 @@ def delete_assign(Id):
 
 def change_assign_by_id(id, accion, parametro=0):
     if accion == 1:
-        #logger.info(f"[change_assign_by_id] Encender: {id}")
+        logger.info(f"[change_assign_by_id] Encender: {id}")
         mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1 WHERE Id = {id}")
     elif accion == 2:
         logger.info(f"[change_assign_by_id] Apagar: {id}")
