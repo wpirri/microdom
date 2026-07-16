@@ -51,6 +51,7 @@ def add_assign(data):
     if next_id in (None, ''):
         next_id = 1
     data['Id'] = next_id
+    data['Actualizar'] = 1  # Marcar para actualizar el HW
 
     campos = []
     valores = []
@@ -75,6 +76,7 @@ def update_assign(data):
     if not Id:
         return {"error": 1, "message": "Id es requerido"}
 
+    data['Actualizar'] = 1  # Marcar para actualizar el HW
     campos_valores = []
     for key, value in data.items():
         if key == 'Id':
@@ -104,39 +106,39 @@ def delete_assign(Id):
 def change_assign_by_id(id, accion, parametro=0):
     if accion == 1:
         logger.info(f"[change_assign_by_id] Encender: {id}")
-        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1 WHERE Id = {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1, Actualizar = 1 WHERE Id = {id}")
     elif accion == 2:
         logger.info(f"[change_assign_by_id] Apagar: {id}")
-        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 0 WHERE Id = {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 0, Actualizar = 1 WHERE Id = {id}")
     elif accion == 3:
         logger.info(f"[change_assign_by_id] Alternar: {id}")
-        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado) WHERE Id = {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado), Actualizar = 1 WHERE Id = {id}")
     elif accion == 4:
         logger.info(f"[change_assign_by_id] Pulso de: {parametro}s a: {id}")
-        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}) WHERE Id = {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}), Actualizar = 1 WHERE Id = {id}")
     else:
         logger.warning(f"change_assign_by_id: acción desconocida {accion} para Id={id}")
 
 def change_assign_by_name(name, accion, parametro=0):
     if accion == 1:
         logger.info(f"[change_assign_by_name] Encender: {name}")
-        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1 WHERE Objeto = '{name}'")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1, Actualizar = 1 WHERE Objeto = '{name}'")
     elif accion == 2:
         logger.info(f"[change_assign_by_name] Apagar: {name}")
-        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 0 WHERE Objeto = '{name}'")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 0, Actualizar = 1 WHERE Objeto = '{name}'")
     elif accion == 3:
         logger.info(f"[change_assign_by_name] Alternar: {name}")
-        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado) WHERE Objeto = '{name}'")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado), Actualizar = 1 WHERE Objeto = '{name}'")
     elif accion == 4:
         logger.info(f"[change_assign_by_name] Pulso de: {parametro}s a: {name}")
-        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}) WHERE Objeto = '{name}'")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}), Actualizar = 1 WHERE Objeto = '{name}'")
     else:
         logger.warning(f"change_assign_by_name: acción desconocida {accion} para Objeto={name}")
 
 def add_assign_to_planta(id, planta):
     if not id or not planta:
         return {"error": 1, "message": "Id y Planta son requeridos"}
-    query = f"UPDATE TB_DOM_ASSIGN SET Icono_Apagado = 'lamp0.png',Icono_Encendido = 'lamp1.png', Cord_x = 200, Cord_y = 50, Planta = {planta} WHERE Id = {id}"
+    query = f"UPDATE TB_DOM_ASSIGN SET Icono_Apagado = 'lamp0.png',Icono_Encendido = 'lamp1.png', Cord_x = 200, Cord_y = 50, Planta = {planta}, Actualizar = 1 WHERE Id = {id}"
     #logger.info(f"[add_assign_to_planta] Actualizando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}

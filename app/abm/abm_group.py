@@ -38,6 +38,7 @@ def add_group(data):
     if next_id in (None, ''):
         next_id = 1
     data['Id'] = next_id
+    data['Actualizar'] = 1  # Marcar para actualizar el HW
 
     campos = []
     valores = []
@@ -62,6 +63,7 @@ def update_group(data):
     if not Id:
         return {"error": 1, "message": "Id es requerido"}
 
+    data['Actualizar'] = 1  # Marcar para actualizar el HW
     campos_valores = []
     for key, value in data.items():
         if key == 'Id':
@@ -117,6 +119,6 @@ def change_group_by_id(id, accion, parametro=0):
                 logger.info(f"[change_group_by_id] Apagar: {obj}")
                 change_assign_by_id(obj, 2)
 
-    mysql_execute(f"UPDATE TB_DOM_GROUP SET Estado = {estado_grupo} WHERE Id = {id};")
+    mysql_execute(f"UPDATE TB_DOM_GROUP SET Estado = {estado_grupo}, Actualizar = 1 WHERE Id = {id};")
 
     return len(objetos)
