@@ -29,9 +29,9 @@ async def infoio(request: Request):
     # Información del dispositivo
     hw_mac_addr = data.get("ID", "NULL").upper()
     hw_typ = data.get("TYP", None)
+    FW = data.get("FW", None)
     AT = data.get("AT", None)
     SDK = data.get("SDK", None)
-    FW = data.get("FW", None)
     # Si el dice que estuvo offline
     OFFLINE = data.get("OFFLINE", None)
     # Parámetros GET (query string)
@@ -40,7 +40,7 @@ async def infoio(request: Request):
     headers = dict(request.headers)
 
     # Busco el dispositivo por MAC
-    rc = check_hw(hw_mac_addr, raddr, f"AT:{AT} SDK:{SDK} FW:{FW}")
+    rc = check_hw(hw_mac_addr, raddr, f"FW:{FW} AT:{AT} SDK:{SDK}")
     if rc:
         if hw_typ == "IO":
             IO1 = data.get("IO1", None)
