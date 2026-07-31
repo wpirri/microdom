@@ -45,7 +45,7 @@ def root(filename: str):
     return FileResponse(file_path)
 
 @app.get("/data/{filename}", response_class=HTMLResponse)
-def root(filename: str):
+def root_data(filename: str):
     file_path = BASE_DIR / "data" / filename
     # Validar existencia
     if not file_path.exists() or not file_path.is_file():

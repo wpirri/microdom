@@ -1,8 +1,12 @@
 #!/bin/sh
-
+echo "Stop microdom..."
 docker stop microdom
 sleep 3
-docker run --rm -it \
+echo "Remove microdom..."
+docker rm microdom
+sleep 3
+docker run -it \
+  -d --restart unless-stopped \
   -e DBUSER=dompi_web \
   -e DBPASSWORD=dompi_web \
   -e DBHOST=192.168.10.32 \
