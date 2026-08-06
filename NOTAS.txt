@@ -1,3 +1,31 @@
+== Instalacione en un server para desarrollo
+apt install sudo build-essential vim net-tools nfs-common mc minicom libcjson1 libcjson-dev libssl-dev xinetd apache2 php libapache2-mod-php default-mysql-client default-libmysqlclient-dev dos2unix curl git tcpdump anacron openssl jq
+apt install nmap
+
+== Intslaciones para python y docker
+apt update
+apt install -y ca-certificates curl gnupg lsb-release
+
+install -m 0755 -d /etc/apt/keyrings
+
+curl -fsSL https://download.docker.com/linux/debian/gpg | \
+gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+apt update
+
+apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+systemctl status docker
+
+apt install skopeo
+
+
 ==========================================================================================
 Servicio de domotica domiciliario
 Se ejecuta en forma local en el hogar y coordina la operaciones de los disositivos de
