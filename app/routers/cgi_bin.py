@@ -200,6 +200,10 @@ async def abmassign_get(request: Request):
         elif funcion == "off":
             change_assign_by_name(objeto, 2)
             return {"error=0&message=Ok"}
+        elif funcion == "pulse":
+            s = request_params.get("Segundos", None)
+            change_assign_by_name(objeto, 4, s)
+            return {"error=0&message=Ok"}
         elif funcion == "get":
             return get_assign(id)
         elif funcion == "delete":

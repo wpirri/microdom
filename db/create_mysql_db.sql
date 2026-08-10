@@ -240,7 +240,7 @@ Enviar integer DEFAULT 0,               -- Evento a enviar
                                         --      1=On
                                         --      2=Off
                                         --      3=Switch
-                                        --      4=Pulso a Objeto o Grupo. Si no Variable = Enviar
+                                        --      4=Pulso a Objeto o Grupo. Duracion del pulso en Parametro_Evento
 Parametro_Evento integer DEFAULT 0,     -- Se pasa si es Variable o Funcion
 Condicion_Variable integer DEFAULT 0,             -- Condiciona el evento
 Condicion_Igualdad integer DEFAULT 0,             -- 0 ==, 1 >, 2 <
@@ -267,7 +267,7 @@ Dias_Semana varchar(128),
 Objeto_Destino integer  DEFAULT 0,        -- Solo uno de los cuatro assign, grupo, Funcion, Variable
 Grupo_Destino integer  DEFAULT 0,         -- Solo uno de los cuatro assign, grupo, Funcion, Variable
 Variable_Destino integer  DEFAULT 0,        -- Solo uno de los cuatro assign, grupo, Funcion, Variable
-Evento integer DEFAULT 0,               -- Evento a enviar 0=Nada 1=On 2=Off 3=Switch 4=Pulso a Objeto o Grupo. Si no Variable = Enviar
+Evento integer DEFAULT 0,               -- Evento a enviar 0=Nada 1=On 2=Off 3=Switch 4=Pulso a Objeto o Grupo. . Duracion del pulso en Parametro_Evento
 Parametro_Evento integer DEFAULT 0,     -- Se pasa si es Variable o Funcion
 Condicion_Variable integer DEFAULT 0,             -- Condiciona el evento
 Condicion_Igualdad integer DEFAULT 0,             -- ==, >, <

@@ -5,83 +5,6 @@ from app.abm.abm_group import change_group_by_id
 
 logger = get_daily_logger()
 
-"""
-CREATE TABLE IF NOT EXISTS TB_DOM_PERIF (
-Id integer primary key,
-MAC varchar(16) NOT NULL,                       -- MAC Address
-Dispositivo varchar(128) NOT NULL,
-Tipo integer DEFAULT 0,                         -- 0=Ninguno, 1=Wifi 2=RBPi 3=DSC 4=Garnet
-Estado integer DEFAULT 0,                       -- 0=Offline
-Direccion_IP varchar(16) DEFAULT "0.0.0.0",
-Ultimo_Ok integer DEFAULT 0,
-Usar_Https integer DEFAULT 0,
-Habilitar_Wiegand integer DEFAULT 0,
-Actualizar integer DEFAULT 0,
-Update_Firmware integer DEFAULT 0,
-Update_WiFi integer DEFAULT 0,
-Update_Config integer DEFAULT 0,
-Informacion varchar(1024),
-UNIQUE INDEX idx_perif_id (Id),
-UNIQUE INDEX idx_perif_mac (MAC)
-);
-
-CREATE TABLE IF NOT EXISTS TB_DOM_ASSIGN (
-    Id integer primary key,
-    Objeto varchar(128) NOT NULL,               -- Nombre para identificarlo en el sistema
-    Dispositivo integer NOT NULL,               -- Discpositivo - Id de TB_DOM_PERIF
-    Port varchar(128) NOT NULL,                 -- Nombre con el que se identifica en el dispositivo
-    Tipo integer NOT NULL,                      -- 0=Output, 1=Input, 2=Analog, 3=Output Alarma, 4=Input Alarma, 5=Output Pulse/Analog_Mult_Div_Valor=Pulse Param, 6=Periferico
-    Estado integer DEFAULT 0,                   -- 1 / 0 para digitales 0 a n para analogicos
-    Estado_HW integer DEFAULT 0,                -- Estado reportado por el HW
-    Perif_Data varchar(128),
-    Icono_Apagado varchar(32),
-    Icono_Encendido varchar(32),
-    Grupo_Visual integer DEFAULT 0,             -- 0=Ninguno 1=Alarma 2=Iluminación 3=Puertas 4=Climatización 5=Cámaras 6=Riego
-    Planta integer DEFAULT 0,
-    Cord_x integer DEFAULT 0,
-    Cord_y integer DEFAULT 0,
-    Coeficiente integer DEFAULT 0,              -- 1=Coeficiente Positivo, -1=Coeficiente Negativo  - rc = Coeficiente * ( (Analog_Mult_Div)?Estado/Analog_Mult_Div_Valor:Estado*Analog_Mult_Div_Valor ) 
-    Analog_Mult_Div integer DEFAULT 0,          -- 0=Multiplicar por valor, 1=Dividir por valor
-    Analog_Mult_Div_Valor integer DEFAULT 1,    -- Parámetro para coeficiente si Tipo=2, Tiempo si Tipo=5
-    Actualizar integer DEFAULT 0,                   -- Enviar update de config al HW por este PORT
-    Flags integer DEFAULT 0,
-    FOREIGN KEY(Dispositivo) REFERENCES TB_DOM_PERIF(Id),
-    FOREIGN KEY(Grupo_Visual) REFERENCES TB_DOM_GRUPO_VISUAL(Id),
-    UNIQUE INDEX idx_assign_id (Id)
-    );
-
-CREATE TABLE IF NOT EXISTS TB_DOM_EVENT (
-    Id integer primary key,
-    Evento varchar(128) NOT NULL,
-    Objeto_Origen integer DEFAULT 0,
-    Objeto_Destino integer  DEFAULT 0,      -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-    Grupo_Destino integer  DEFAULT 0,       -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-    Particion_Destino integer  DEFAULT 0,   -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-    Variable_Destino integer  DEFAULT 0,    -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-    ON_a_OFF integer DEFAULT 0,
-    OFF_a_ON integer DEFAULT 0,
-    Enviar integer DEFAULT 0,               -- Evento a enviar 
-                                            --      0=Nada 
-                                            --      1=On 
-                                            --      2=Off 
-                                            --      3=Switch 
-                                            --      4=Pulso a Objeto o Grupo. Si no Variable = Enviar
-    Parametro_Evento integer DEFAULT 0,     -- Se pasa si es Variable o Funcion
-    Condicion_Variable integer DEFAULT 0,             -- Condiciona el evento
-    Condicion_Igualdad integer DEFAULT 0,             -- 0 ==, 1 >, 2 <
-    Condicion_Valor integer DEFAULT 0,                -- Valor de condicion
-    Filtro_Repeticion integer DEFAULT 0,              -- Segundos para ignorar repeticiones
-    Ultimo_Evento  integer DEFAULT 0,
-    Flags integer DEFAULT 0,
-    FOREIGN KEY(Objeto_Origen) REFERENCES TB_DOM_ASSIGN(Id),
-    FOREIGN KEY(Objeto_Destino) REFERENCES TB_DOM_ASSIGN(Id),
-    FOREIGN KEY(Grupo_Destino) REFERENCES TB_DOM_GROUP(Id),
-    FOREIGN KEY(Particion_Destino) REFERENCES TB_DOM_ALARM_PARTICION(Id),
-    FOREIGN KEY(Variable_Destino) REFERENCES TB_DOM_FLAG(Id),
-    UNIQUE INDEX idx_event_id (Id)
-    );
-"""
-
 def check_io_event(mac, io, status):
     logger.info(f"[check_io_event] EVENTO: HW: {mac} Port: {io} Status: {status}")
     cambio = "OFF_a_ON" if str(status) == "1" else "ON_a_OFF"
@@ -101,11 +24,11 @@ def check_io_event(mac, io, status):
     for i in range(0, len(query_result)):
         if query_result[i]['Objeto_Destino']:
             logger.info(f"[check_io_event] ACCION: Enviar: {query_result[i]['Enviar']} a Objeto: {query_result[i]['Objeto_Destino']}")
-            change_assign_by_id(query_result[i]['Objeto_Destino'], query_result[i]['Enviar'])
+            change_assign_by_id(query_result[i]['Objeto_Destino'], query_result[i]['Enviar'], query_result[i]['Parametro_Evento'])
             pass
         if query_result[i]['Grupo_Destino']:
             logger.info(f"[check_io_event] ACCION: Enviar: {query_result[i]['Enviar']} a Grupo: {query_result[i]['Grupo_Destino']}")
-            change_group_by_id(query_result[i]['Grupo_Destino'], query_result[i]['Enviar'])
+            change_group_by_id(query_result[i]['Grupo_Destino'], query_result[i]['Enviar'], query_result[i]['Parametro_Evento'])
             pass
         if query_result[i]['Particion_Destino']:
             logger.info(f"[check_io_event] ACCION: Enviar: {query_result[i]['Enviar']} a Particion: {query_result[i]['Particion_Destino']}")
@@ -131,7 +54,7 @@ def analyze_event(mac, changes, io1, io2, io3, io4, io5, io6, io7, io8, out1, ou
 def get_hw_io_status(hw_mac_addr):
     resp = "error=0&message=Ok"
 
-    query_result = mysql_query(f"SELECT Port, Estado FROM TB_DOM_ASSIGN WHERE (Tipo = 0 OR Tipo = 3 OR Tipo = 5) AND Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}')")
+    query_result = mysql_query(f"SELECT Port, Estado, Tipo FROM TB_DOM_ASSIGN WHERE (Tipo = 0 OR Tipo = 3 OR Tipo = 5) AND Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}')")
     if query_result:
         resp += "&" + "&".join([f"{item['Port']}={item['Estado']}" for item in query_result])
         return resp
@@ -159,12 +82,12 @@ def get_hw_update_data(hw_mac_addr):
 
 def get_assign_status_id(id, planta):
     if id:
-        query_result = mysql_query(f"SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data FROM TB_DOM_ASSIGN WHERE Id = {id};")
+        query_result = mysql_query(f"SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data, Analog_Mult_Div_Valor FROM TB_DOM_ASSIGN WHERE Id = {id};")
     else:
         if planta:
-            query_result = mysql_query(f"SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data FROM TB_DOM_ASSIGN WHERE Planta = {planta};")
+            query_result = mysql_query(f"SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data, Analog_Mult_Div_Valor FROM TB_DOM_ASSIGN WHERE Planta = {planta};")
         else:  
-            query_result = mysql_query("SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data FROM TB_DOM_ASSIGN")
+            query_result = mysql_query("SELECT Id, Objeto, Port, Icono_Apagado, Icono_Encendido, Estado, Tipo, Perif_Data, Analog_Mult_Div_Valor FROM TB_DOM_ASSIGN")
     return {"error": 0, "message": "Ok", "response": query_result if query_result else []}
     
 def get_assign_info_id(id, planta):

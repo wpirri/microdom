@@ -114,6 +114,8 @@ def change_assign_by_id(id, accion, parametro=0):
         logger.info(f"[change_assign_by_id] Alternar: {id}")
         mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado), Actualizar = 1 WHERE Id = {id}")
     elif accion == 4:
+        if parametro == 0:
+            parametro = 1  # Valor por defecto para la duración del pulso
         logger.info(f"[change_assign_by_id] Pulso de: {parametro}s a: {id}")
         mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}), Actualizar = 1 WHERE Id = {id}")
     else:
@@ -130,6 +132,8 @@ def change_assign_by_name(name, accion, parametro=0):
         logger.info(f"[change_assign_by_name] Alternar: {name}")
         mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado), Actualizar = 1 WHERE Objeto = '{name}'")
     elif accion == 4:
+        if parametro == 0:
+            parametro = 1  # Valor por defecto para la duración del pulso
         logger.info(f"[change_assign_by_name] Pulso de: {parametro}s a: {name}")
         mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}), Actualizar = 1 WHERE Objeto = '{name}'")
     else:
