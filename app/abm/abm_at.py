@@ -3,35 +3,6 @@ from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
 
 logger = get_daily_logger()
 
-"""
-CREATE TABLE IF NOT EXISTS TB_DOM_AT (
-Id integer primary key,
-Agenda varchar(128) NOT NULL,
-Mes integer DEFAULT 0,
-Dia integer DEFAULT 0,
-Hora integer DEFAULT 0,
-Minuto integer DEFAULT 0,
-Dias_Semana varchar(128),
-Objeto_Destino integer  DEFAULT 0,        -- Solo uno de los cuatro assign, grupo, Funcion, Variable
-Grupo_Destino integer  DEFAULT 0,         -- Solo uno de los cuatro assign, grupo, Funcion, Variable
-Variable_Destino integer  DEFAULT 0,        -- Solo uno de los cuatro assign, grupo, Funcion, Variable
-Evento integer DEFAULT 0,               -- Evento a enviar 0=Nada 1=On 2=Off 3=Switch 4=Pulso a Objeto o Grupo. Si no Variable = Enviar
-Parametro_Evento integer DEFAULT 0,     -- Se pasa si es Variable o Funcion
-Condicion_Variable integer DEFAULT 0,             -- Condiciona el evento
-Condicion_Igualdad integer DEFAULT 0,             -- ==, >, <
-Condicion_Valor integer DEFAULT 0,                -- Valor de condicion
-Ultimo_Mes integer DEFAULT 0,
-Ultimo_Dia integer DEFAULT 0,
-Ultima_Hora integer DEFAULT 0,
-Ultimo_Minuto integer DEFAULT 0,
-Flags integer DEFAULT 0,
-FOREIGN KEY(Objeto_Destino) REFERENCES TB_DOM_ASSIGN(Id),
-FOREIGN KEY(Grupo_Destino) REFERENCES TB_DOM_GROUP(Id),
-FOREIGN KEY(Variable_Destino) REFERENCES TB_DOM_FLAG(Id),
-UNIQUE INDEX idx_at_id (Id)
-);
-"""
-
 def get_task_list():
     query = """SELECT TASK.Id, Agenda, ASS.Objeto 
         FROM TB_DOM_AT AS TASK, TB_DOM_ASSIGN AS ASS 

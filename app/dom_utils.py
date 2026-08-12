@@ -71,14 +71,34 @@ def get_hw_update_data(hw_mac_addr):
             mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_Firmware = 0 WHERE MAC = '{hw_mac_addr}'")
         elif query_result[0]['Update_WiFi'] == 1:
             logger.info(f"Solicitando actualizacion de WiFi a: {hw_mac_addr}")
-            resp = "&update=wifi"
+            config_result = mysql_query("SELECT * FROM TB_DOM_CONFIG ORDER BY Id DESC LIMIT 1;")
+            if config_result:
+                config = config_result[0]
+                resp += f"&ap1={config.get('Wifi_AP1', '')}"
+                resp += f"&ap1p={config.get('Wifi_AP1_Pass', '')}"
+                resp += f"&ap2={config.get('Wifi_AP2', '')}"
+                resp += f"&ap2p={config.get('Wifi_AP2_Pass', '')}"
+                resp += f"&ce1={config.get('Home_Host_1_Address', '')}"
+                resp += f"&ce2={config.get('Home_Host_2_Address', '')}"
+                resp += f"&rep={config.get('Wifi_Report', '')}"
+                resp += f"&path={config.get('Rqst_Path', '')}"
             mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_WiFi = 0 WHERE MAC = '{hw_mac_addr}'")
         elif query_result[0]['Update_Config'] == 1:
-            logger.info(f"Solicitando actualizacion de configuracion a: {hw_mac_addr}")
-            resp = "&update=config"
+            logger.info(f"Solicitando actualizacion de configuracion de I/O a: {hw_mac_addr}")
+            config_result = mysql_query(f"SELECT A.Port, A.Tipo FROM TB_DOM_ASSIGN AS A, TB_DOM_PERIF AS P WHERE A.Dispositivo = P.Id AND P.MAC = '{hw_mac_addr}';")
+            if config_result:
+                for item in config_result:
+                    tipo = "x"
+                    if item['Tipo'] == 0 or item['Tipo'] == 3 or item['Tipo'] == 5:
+                        tipo = "o"
+                    elif item['Tipo'] == 1 or item['Tipo'] == 4:
+                        tipo = "i"
+                    elif item['Tipo'] == 3:
+                        tipo = "a"
+                    if tipo != "x":
+                        resp += f"&cfg{item['Port']}={tipo}"
             mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_Config = 0 WHERE MAC = '{hw_mac_addr}'")
     return resp
-
 
 def get_assign_status_id(id, planta):
     if id:

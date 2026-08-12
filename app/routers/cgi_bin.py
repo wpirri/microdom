@@ -140,7 +140,7 @@ async def abmhw_get(request: Request):
             return set_hardware_update_flag(id, 1, 0, 0)
         elif funcion == "update_wifi":
             return set_hardware_update_flag(id, 0, 1, 0)
-        elif funcion == "update_config":
+        elif funcion == "update_ioconfig":
             return set_hardware_update_flag(id, 0, 0, 1)
         else:
             logger.info(f"[GET abmhw] Función desconocida: {funcion}")

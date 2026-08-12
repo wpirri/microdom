@@ -3,32 +3,6 @@ from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
 
 logger = get_daily_logger()
 
-"""
-CREATE TABLE IF NOT EXISTS TB_DOM_TOUCH (
-Dispositivo integer,
-Pantalla integer,
-Boton integer,
-Evento integer DEFAULT 0,                -- 0=Nada 1=On 2=Off 3=Switch 4=Pulso 10=Config 11=Home 12=Prev 13=Next
-Objeto integer DEFAULT 0,
-X integer DEFAULT 0,
-Y integer DEFAULT 0,
-W integer DEFAULT 0,
-H integer DEFAULT 0,
-Redondo integer DEFAULT 0,
-Texto varchar(16),
-Icono varchar(16),
-Color_pantalla integer DEFAULT 0,
-Color_borde integer DEFAULT 0,
-Color_fondo integer DEFAULT 0,
-Color_texto integer DEFAULT 0,
-Orientacion integer DEFAULT 0,
-UNIQUE INDEX idx_touch_id (Dispositivo,Pantalla,Boton),
-FOREIGN KEY(Dispositivo) REFERENCES TB_DOM_PERIF(Id),
-FOREIGN KEY(Objeto) REFERENCES TB_DOM_ASSIGN(Id)
-);
-
-"""
-
 def get_touch_list(id, pantalla):
     if id:
         if pantalla:

@@ -3,33 +3,6 @@ from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
 
 logger = get_daily_logger()
 
-"""
-CREATE TABLE IF NOT EXISTS TB_DOM_ASSIGN (
-Id integer primary key,
-Objeto varchar(128) NOT NULL,               -- Nombre para identificarlo en el sistema
-Dispositivo integer NOT NULL,               -- Discpositivo - Id de TB_DOM_PERIF
-Port varchar(128) NOT NULL,                 -- Nombre con el que se identifica en el dispositivo
-Tipo integer NOT NULL,                      -- 0=Output, 1=Input, 2=Analog, 3=Output Alarma, 4=Input Alarma, 5=Output Pulse/Analog_Mult_Div_Valor=Pulse Param, 6=Periferico
-Estado integer DEFAULT 0,                   -- 1 / 0 para digitales 0 a n para analogicos
-Estado_HW integer DEFAULT 0,                -- Estado reportado por el HW
-Perif_Data varchar(128),
-Icono_Apagado varchar(32),
-Icono_Encendido varchar(32),
-Grupo_Visual integer DEFAULT 0,             -- 0=Ninguno 1=Alarma 2=Iluminación 3=Puertas 4=Climatización 5=Cámaras 6=Riego
-Planta integer DEFAULT 0,
-Cord_x integer DEFAULT 0,
-Cord_y integer DEFAULT 0,
-Coeficiente integer DEFAULT 0,              -- 1=Coeficiente Positivo, -1=Coeficiente Negativo  - rc = Coeficiente * ( (Analog_Mult_Div)?Estado/Analog_Mult_Div_Valor:Estado*Analog_Mult_Div_Valor )
-Analog_Mult_Div integer DEFAULT 0,          -- 0=Multiplicar por valor, 1=Dividir por valor
-Analog_Mult_Div_Valor integer DEFAULT 1,    -- Parámetro para coeficiente si Tipo=2, Tiempo si Tipo=5
-Actualizar integer DEFAULT 0,                   -- Enviar update de config al HW por este PORT
-Flags integer DEFAULT 0,
-FOREIGN KEY(Dispositivo) REFERENCES TB_DOM_PERIF(Id),
-FOREIGN KEY(Grupo_Visual) REFERENCES TB_DOM_GRUPO_VISUAL(Id),
-UNIQUE INDEX idx_assign_id (Id)
-);
-"""
-
 def get_assign_list():
     query = """SELECT ASS.Id, ASS.Objeto, HW.Dispositivo, ASS.Port, ASS.Tipo 
                 FROM TB_DOM_ASSIGN AS ASS, TB_DOM_PERIF AS HW 

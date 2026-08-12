@@ -3,39 +3,6 @@ from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
 
 logger = get_daily_logger()
 
-"""
-CREATE TABLE IF NOT EXISTS TB_DOM_EVENT (
-Id integer primary key,
-Evento varchar(128) NOT NULL,
-Objeto_Origen integer DEFAULT 0,
-Objeto_Destino integer  DEFAULT 0,      -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-Grupo_Destino integer  DEFAULT 0,       -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-Particion_Destino integer  DEFAULT 0,   -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-Variable_Destino integer  DEFAULT 0,    -- Solo uno de los cinco assign, grupo, Funcion, Particion, Variable
-ON_a_OFF integer DEFAULT 0,
-OFF_a_ON integer DEFAULT 0,
-Enviar integer DEFAULT 0,               -- Evento a enviar
-                                        --      0=Nada
-                                        --      1=On
-                                        --      2=Off
-                                        --      3=Switch
-                                        --      4=Pulso a Objeto o Grupo. Si no Variable = Enviar
-Parametro_Evento integer DEFAULT 0,     -- Se pasa si es Variable o Funcion
-Condicion_Variable integer DEFAULT 0,             -- Condiciona el evento
-Condicion_Igualdad integer DEFAULT 0,             -- 0 ==, 1 >, 2 <
-Condicion_Valor integer DEFAULT 0,                -- Valor de condicion
-Filtro_Repeticion integer DEFAULT 0,              -- Segundos para ignorar repeticiones
-Ultimo_Evento  integer DEFAULT 0,
-Flags integer DEFAULT 0,
-FOREIGN KEY(Objeto_Origen) REFERENCES TB_DOM_ASSIGN(Id),
-FOREIGN KEY(Objeto_Destino) REFERENCES TB_DOM_ASSIGN(Id),
-FOREIGN KEY(Grupo_Destino) REFERENCES TB_DOM_GROUP(Id),
-FOREIGN KEY(Particion_Destino) REFERENCES TB_DOM_ALARM_PARTICION(Id),
-FOREIGN KEY(Variable_Destino) REFERENCES TB_DOM_FLAG(Id),
-UNIQUE INDEX idx_event_id (Id)
-);
-"""
-
 def get_event_list():
     query = """SELECT EV.Id, EV.Evento, EV.ON_a_OFF AS \'OFF\', EV.OFF_a_ON AS \'ON\', ASS.Objeto AS Origen 
                 FROM TB_DOM_EVENT AS EV, TB_DOM_ASSIGN AS ASS 

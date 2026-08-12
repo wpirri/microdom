@@ -3,26 +3,6 @@ from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
 
 logger = get_daily_logger()
 
-"""
-CREATE TABLE IF NOT EXISTS TB_DOM_PERIF (
-    Id integer primary key,
-    MAC varchar(16) NOT NULL,                       -- MAC Address
-    Dispositivo varchar(128) NOT NULL,
-    Tipo integer DEFAULT 0,                         -- 0=Ninguno, 1=Wifi 2=RBPi 3=DSC 4=Garnet
-    Estado integer DEFAULT 0,                       -- 0=Offline
-    Direccion_IP varchar(16) DEFAULT "0.0.0.0",
-    Ultimo_Ok integer DEFAULT 0,
-    Usar_Https integer DEFAULT 0,
-    Habilitar_Wiegand integer DEFAULT 0,
-    Update_Firmware integer DEFAULT 0,
-    Update_WiFi integer DEFAULT 0,
-    Update_Config integer DEFAULT 0,
-    Informacion varchar(1024),
-    UNIQUE INDEX idx_perif_id (Id),
-    UNIQUE INDEX idx_perif_mac (MAC)
-);
-"""
-
 def check_hw(mac_addr, ip_address, info):
     # Verificar si el periférico ya existe
     if mac_addr != None:
@@ -107,7 +87,7 @@ def delete_hardware(Id):
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
 
-def set_hardware_update_flag(Id, firmware, wifi, config):
+def set_hardware_update_flag(Id, firmware, wifi, ioconfig):
     if not Id:
         return {"error": 1, "message": "Id es requerido"}
 
@@ -115,10 +95,10 @@ def set_hardware_update_flag(Id, firmware, wifi, config):
         firmware = 0
     if wifi is None:
         wifi = 0
-    if config is None:
-        config = 0
+    if ioconfig is None:
+        ioconfig = 0
 
-    query = f"UPDATE TB_DOM_PERIF SET Update_Firmware = {firmware}, Update_WiFi = {wifi}, Update_Config = {config} WHERE Id = {Id}"
+    query = f"UPDATE TB_DOM_PERIF SET Update_Firmware = {firmware}, Update_WiFi = {wifi}, Update_Config = {ioconfig} WHERE Id = {Id}"
     #logger.info(f"[set_hardware_update_flag] Query: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
