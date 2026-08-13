@@ -63,7 +63,7 @@ def get_hw_io_status(hw_mac_addr):
 
 def get_hw_update_data(hw_mac_addr):
     resp = ""
-    query_result = mysql_query(f"SELECT Update_Firmware, Update_WiFi, Update_Config FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}'")
+    query_result = mysql_query(f"SELECT Tipo, Update_Firmware, Update_WiFi, Update_Config FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}'")
     if query_result:
         if query_result[0]['Update_Firmware'] == 1:
             logger.info(f"Solicitando actualizacion de firmware a: {hw_mac_addr}")
@@ -80,7 +80,12 @@ def get_hw_update_data(hw_mac_addr):
                 resp += f"&ap2p={config.get('Wifi_AP2_Pass', '')}"
                 resp += f"&ce1={config.get('Home_Host_1_Address', '')}"
                 resp += f"&ce2={config.get('Home_Host_2_Address', '')}"
-                resp += f"&rep={config.get('Wifi_Report', '')}"
+                #
+                if query_result[0]['Tipo'] == 1:
+                    resp += f"&rep=1"
+                elif query_result[0]['Tipo'] == 5:
+                    resp += f"&rep={config.get('Wifi_Report', '')}"
+                #
                 resp += f"&path={config.get('Rqst_Path', '')}"
             mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_WiFi = 0 WHERE MAC = '{hw_mac_addr}'")
         elif query_result[0]['Update_Config'] == 1:
