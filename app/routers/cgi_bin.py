@@ -60,8 +60,11 @@ async def infoio(request: Request):
             OUT7 = data.get("OUT7", None)
             OUT8 = data.get("OUT8", None)
             CHG = data.get("CHG", None)
+            CARD = data.get("CARD", None)
 
-            analyze_event(hw_mac_addr, CHG, IO1, IO2, IO3, IO4, IO5, IO6, IO7, IO8, OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8)
+            analyze_event(hw_mac_addr, CHG, 
+                          IO1, IO2, IO3, IO4, IO5, IO6, IO7, IO8, 
+                          OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, CARD)
 
             return {get_hw_io_status(hw_mac_addr) + get_hw_update_data(hw_mac_addr)}
         elif hw_typ == "TOUCH":

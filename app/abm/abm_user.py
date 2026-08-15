@@ -69,3 +69,18 @@ def delete_user(Id):
     #logger.info(f"[delete_user] Eliminando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
+
+def check_card_auth(card):
+    query = f"SELECT * FROM TB_DOM_USER WHERE Tarjeta = '{card}'"
+    query_result = mysql_query(query)
+    if query_result:
+        for i in range(0, len(query_result)):
+            nombre = query_result[i]['Nombre_Completo']
+            logger.info(f"[check_card_auth] Tarjeta: {card} - Usuario; {nombre}")
+            
+        return True
+    else:
+        logger.info(f"[check_card_auth] Tarjeta: {card} - No válida")
+
+
+    return False

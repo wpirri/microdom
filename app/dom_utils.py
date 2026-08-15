@@ -1,5 +1,6 @@
 from app.log_utils import get_daily_logger
 from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
+from app.abm.abm_user import check_card_auth
 from app.abm.abm_assign import change_assign_by_id
 from app.abm.abm_group import change_group_by_id
 
@@ -7,7 +8,10 @@ logger = get_daily_logger()
 
 def check_io_event(mac, io, status):
     logger.info(f"[check_io_event] EVENTO: HW: {mac} Port: {io} Status: {status}")
-    cambio = "OFF_a_ON" if str(status) == "1" else "ON_a_OFF"
+    if io == "CARD":
+        cambio = "OFF_a_ON"
+    else:
+        cambio = "OFF_a_ON" if str(status) == "1" else "ON_a_OFF"
     query = (
         "SELECT EV.Enviar, EV.Objeto_Destino, EV.Grupo_Destino, EV.Particion_Destino, "
         "EV.Variable_Destino, EV.Parametro_Evento "
@@ -22,6 +26,10 @@ def check_io_event(mac, io, status):
         return None
 
     for i in range(0, len(query_result)):
+        if io == "CARD":
+            # Tengo que validar la tarjeta para cada evento
+            if not check_card_auth(status):
+                return None
         if query_result[i]['Objeto_Destino']:
             logger.info(f"[check_io_event] ACCION: Enviar: {query_result[i]['Enviar']} a Objeto: {query_result[i]['Objeto_Destino']}")
             change_assign_by_id(query_result[i]['Objeto_Destino'], query_result[i]['Enviar'], query_result[i]['Parametro_Evento'])
@@ -42,7 +50,9 @@ def check_io_event(mac, io, status):
 
     return query_result
 
-def analyze_event(mac, changes, io1, io2, io3, io4, io5, io6, io7, io8, out1, out2, out3, out4, out5, out6, out7, out8):
+def analyze_event(mac, changes, 
+                  io1, io2, io3, io4, io5, io6, io7, io8, 
+                  out1, out2, out3, out4, out5, out6, out7, out8, card):
     if changes != None:
         #logger.info(f"[analyze_event] MAC: {mac} Cambios: {changes}")
         for i in range(1, 9):
@@ -50,6 +60,8 @@ def analyze_event(mac, changes, io1, io2, io3, io4, io5, io6, io7, io8, out1, ou
                 check_io_event(mac, f"IO{i}", eval(f"io{i}"))
             if f"OUT{i}" in changes:
                 check_io_event(mac, f"OUT{i}", eval(f"out{i}"))
+    if card != None:
+        check_io_event(mac, "CARD", card)
 
 def get_hw_io_status(hw_mac_addr):
     resp = "error=0&message=Ok"
@@ -65,7 +77,7 @@ def get_hw_update_data(hw_mac_addr):
     firmware = ""
     wifi_config = ""
     io_config = ""
-    wiegand = "&wiegand=0"
+    wiegand = ""
 
     query_result = mysql_query(f"SELECT Tipo, Update_Firmware, Update_WiFi, Update_Config FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}'")
     if query_result:
@@ -105,6 +117,7 @@ def get_hw_update_data(hw_mac_addr):
             logger.info(f"Solicitando actualizacion de configuracion de I/O a: {hw_mac_addr}")
             config_result = mysql_query(f"SELECT A.Port, A.Tipo FROM TB_DOM_ASSIGN AS A, TB_DOM_PERIF AS P WHERE A.Dispositivo = P.Id AND P.MAC = '{hw_mac_addr}';")
             if config_result:
+                wiegand = "&wiegand=0"
                 for item in config_result:
                     tipo = "x"
                     if item['Tipo'] == 0 or item['Tipo'] == 3 or item['Tipo'] == 5:
