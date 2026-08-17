@@ -78,6 +78,12 @@ def get_hw_update_data(hw_mac_addr):
     wifi_config = ""
     io_config = ""
     wiegand = ""
+    io1 = "i"
+    io2 = "i"
+    io3 = "i"
+    io4 = "i"
+    io5 = "i"
+    io6 = "i"
 
     query_result = mysql_query(f"SELECT Tipo, Update_Firmware, Update_WiFi, Update_Config FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}'")
     if query_result:
@@ -116,22 +122,34 @@ def get_hw_update_data(hw_mac_addr):
         if query_result[0]['Update_Config'] == 1:
             logger.info(f"Solicitando actualizacion de configuracion de I/O a: {hw_mac_addr}")
             config_result = mysql_query(f"SELECT A.Port, A.Tipo FROM TB_DOM_ASSIGN AS A, TB_DOM_PERIF AS P WHERE A.Dispositivo = P.Id AND P.MAC = '{hw_mac_addr}';")
+            wiegand = "&wiegand=0"
             if config_result:
-                wiegand = "&wiegand=0"
                 for item in config_result:
                     tipo = "x"
+                    # Tipo
                     if item['Tipo'] == 0 or item['Tipo'] == 3 or item['Tipo'] == 5:
                         tipo = "o"
                     elif item['Tipo'] == 1 or item['Tipo'] == 4:
                         tipo = "i"
-                    elif item['Tipo'] == 3:
+                    elif item['Tipo'] == 2:
                         tipo = "a"
-                    elif item['Tipo'] == 6:
+                    # Port
+                    if item['Port'] == "IO1":
+                        io1 = tipo
+                    elif item['Port'] == "IO2":
+                        io2 = tipo
+                    elif item['Port'] == "IO3":
+                        io3 = tipo
+                    elif item['Port'] == "IO4":
+                        io4 = tipo
+                    elif item['Port'] == "IO5":
+                        io5 = tipo
+                    elif item['Port'] == "IO6":
+                        io6 = tipo
+                    elif item['Port'] == "CARD":
                         wiegand = "&wiegand=1"
-
-                    if tipo != "x":
-                        io_config += f"&cfg{item['Port']}={tipo}"
-
+            # Armo la configuraciòn de I/O
+            io_config = f"{wiegand}&cfgIO1={io1}&cfgIO2={io2}&cfgIO3={io3}&cfgIO4={io4}&cfgIO5={io5}&cfgIO6={io6}"
             mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_Config = 0 WHERE MAC = '{hw_mac_addr}'")
     # Devuelvo todas las configuraciones juntas
     return firmware + wiegand + io_config + wifi_config
