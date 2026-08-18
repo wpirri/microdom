@@ -15,7 +15,7 @@ def check_hw(mac_addr, ip_address, info):
             logger.info(f"HW: {query_result[0]['Dispositivo']} OFFLINE -> ONLINE")
         # Actualizar el periférico existente
         mysql_execute(f"UPDATE TB_DOM_PERIF SET Direccion_IP = '{ip_address}', Ultimo_Ok = UNIX_TIMESTAMP(), Estado = 1, Informacion = '{info}' WHERE MAC = '{mac_addr}'")
-        return query_result[0]['Id'] 
+        return query_result[0]['Dispositivo'] 
     else:
         # HW no existe
         return None

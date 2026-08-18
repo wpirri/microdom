@@ -40,8 +40,11 @@ async def infoio(request: Request):
     headers = dict(request.headers)
 
     # Busco el dispositivo por MAC
-    rc = check_hw(hw_mac_addr, raddr, f"FW:{FW} AT:{AT} SDK:{SDK}")
-    if rc:
+    Dispositivo = check_hw(hw_mac_addr, raddr, f"FW:{FW} AT:{AT} SDK:{SDK}")
+    if Dispositivo:
+        OFFLINE = data.get("OFFLINE", None)
+        if OFFLINE:
+            logger.info(f"HW: {Dispositivo} estuvo OFFLINE (Firmware: {FW})")
         if hw_typ == "IO":
             IO1 = data.get("IO1", None)
             IO2 = data.get("IO2", None)
@@ -61,12 +64,13 @@ async def infoio(request: Request):
             OUT8 = data.get("OUT8", None)
             CHG = data.get("CHG", None)
             CARD = data.get("CARD", None)
+            UPDATEIO = data.get("UPDATEIO", None)
 
             analyze_event(hw_mac_addr, CHG, 
                           IO1, IO2, IO3, IO4, IO5, IO6, IO7, IO8, 
                           OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, CARD)
 
-            return {get_hw_io_status(hw_mac_addr) + get_hw_update_data(hw_mac_addr)}
+            return {get_hw_io_status(hw_mac_addr) + get_hw_update_data(hw_mac_addr, UPDATEIO)}
         elif hw_typ == "TOUCH":
             return {"error=0&message=Ok" + get_hw_update_data(hw_mac_addr)}
         else:

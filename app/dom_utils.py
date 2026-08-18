@@ -73,7 +73,7 @@ def get_hw_io_status(hw_mac_addr):
     else:
         return "error=0&message=Ok"
 
-def get_hw_update_data(hw_mac_addr):
+def get_hw_update_data(hw_mac_addr, update_io=None):
     firmware = ""
     wifi_config = ""
     io_config = ""
@@ -85,20 +85,21 @@ def get_hw_update_data(hw_mac_addr):
     io5 = "i"
     io6 = "i"
 
-    query_result = mysql_query(f"SELECT Tipo, Update_Firmware, Update_WiFi, Update_Config FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}'")
+    query_result = mysql_query(f"SELECT Dispositivo, Tipo, Update_Firmware, Update_WiFi, Update_Config FROM TB_DOM_PERIF WHERE MAC = '{hw_mac_addr}'")
     if query_result:
+        tipo_hw = query_result[0]['Tipo']
         #
         #   El dispositivo tiene que solicitar download de fiermware y reiniciar
         #
         if query_result[0]['Update_Firmware'] == 1:
-            logger.info(f"Solicitando actualizacion de firmware a: {hw_mac_addr}")
+            logger.info(f"Solicitando a {query_result[0]['Dispositivo']} que actualize firmware")
             firmware = "&update=firmware"
             mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_Firmware = 0 WHERE MAC = '{hw_mac_addr}'")
         #
         #   Actualizazo configuración de wifi del dispositivo
         #
         if query_result[0]['Update_WiFi'] == 1:
-            logger.info(f"Solicitando actualizacion de WiFi a: {hw_mac_addr}")
+            logger.info(f"Enviando datos de WiFi a: {query_result[0]['Dispositivo']}")
             config_result = mysql_query("SELECT * FROM TB_DOM_CONFIG ORDER BY Id DESC LIMIT 1;")
             if config_result:
                 config = config_result[0]
@@ -119,37 +120,42 @@ def get_hw_update_data(hw_mac_addr):
         #
         #   ACtualizo la configuración de I/O del dispositivo
         #
-        if query_result[0]['Update_Config'] == 1:
-            logger.info(f"Solicitando actualizacion de configuracion de I/O a: {hw_mac_addr}")
-            config_result = mysql_query(f"SELECT A.Port, A.Tipo FROM TB_DOM_ASSIGN AS A, TB_DOM_PERIF AS P WHERE A.Dispositivo = P.Id AND P.MAC = '{hw_mac_addr}';")
-            wiegand = "&wiegand=0"
-            if config_result:
-                for item in config_result:
-                    tipo = "x"
-                    # Tipo
-                    if item['Tipo'] == 0 or item['Tipo'] == 3 or item['Tipo'] == 5:
-                        tipo = "o"
-                    elif item['Tipo'] == 1 or item['Tipo'] == 4:
-                        tipo = "i"
-                    elif item['Tipo'] == 2:
-                        tipo = "a"
-                    # Port
-                    if item['Port'] == "IO1":
-                        io1 = tipo
-                    elif item['Port'] == "IO2":
-                        io2 = tipo
-                    elif item['Port'] == "IO3":
-                        io3 = tipo
-                    elif item['Port'] == "IO4":
-                        io4 = tipo
-                    elif item['Port'] == "IO5":
-                        io5 = tipo
-                    elif item['Port'] == "IO6":
-                        io6 = tipo
-                    elif item['Port'] == "CARD":
-                        wiegand = "&wiegand=1"
-            # Armo la configuraciòn de I/O
-            io_config = f"{wiegand}&cfgIO1={io1}&cfgIO2={io2}&cfgIO3={io3}&cfgIO4={io4}&cfgIO5={io5}&cfgIO6={io6}"
+        if query_result[0]['Update_Config'] == 1 or update_io:
+            if tipo_hw == 1:    # IO-WiFi
+                logger.info(f"Enviando configuracion de I/O a: {query_result[0]['Dispositivo']}")
+                config_result = mysql_query(f"SELECT A.Port, A.Tipo FROM TB_DOM_ASSIGN AS A, TB_DOM_PERIF AS P WHERE A.Dispositivo = P.Id AND P.MAC = '{hw_mac_addr}';")
+                wiegand = "&wiegand=0"
+                if config_result:
+                    for item in config_result:
+                        tipo = "x"
+                        # Tipo
+                        if item['Tipo'] == 0 or item['Tipo'] == 3 or item['Tipo'] == 5:
+                            tipo = "o"
+                        elif item['Tipo'] == 1 or item['Tipo'] == 4:
+                            tipo = "i"
+                        elif item['Tipo'] == 2:
+                            tipo = "a"
+                        # Port
+                        if item['Port'] == "IO1":
+                            io1 = tipo
+                        elif item['Port'] == "IO2":
+                            io2 = tipo
+                        elif item['Port'] == "IO3":
+                            io3 = tipo
+                        elif item['Port'] == "IO4":
+                            io4 = tipo
+                        elif item['Port'] == "IO5":
+                            io5 = tipo
+                        elif item['Port'] == "IO6":
+                            io6 = tipo
+                        elif item['Port'] == "CARD":
+                            wiegand = "&wiegand=1"
+                # Armo la configuraciòn de I/O
+                io_config = f"{wiegand}&cfgIO1={io1}&cfgIO2={io2}&cfgIO3={io3}&cfgIO4={io4}&cfgIO5={io5}&cfgIO6={io6}"
+            elif tipo_hw == 5:      # Touch
+                logger.info(f"Solicitando a {query_result[0]['Dispositivo']} que actualize configuracion")
+                io_config = "&update=config"
+                
             mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_Config = 0 WHERE MAC = '{hw_mac_addr}'")
     # Devuelvo todas las configuraciones juntas
     return firmware + wiegand + io_config + wifi_config
