@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Request, Form
 from app.log_utils import get_daily_logger
 from app.dom_utils import analyze_event, get_hw_io_status, get_assign_status_id, get_assign_info_id, get_hw_update_data
-from app.abm.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, get_hardware_list_all, update_hardware, delete_hardware, set_hardware_update_flag
+from app.abm.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, get_hardware_list_all, update_hardware, delete_hardware, set_hardware_update_flag, add_invalid_hardware, get_invalid_hardware_list
 from app.abm.abm_sys import add_sys_config, get_sys_config
 from app.abm.abm_assign import add_assign, get_assign_list, get_assign, get_assign_list_all, update_assign, delete_assign, change_assign_by_name, add_assign_to_planta
 from app.abm.abm_event import add_event, get_event_list, get_event_list_all, get_event, update_event, delete_event
 from app.abm.abm_group import add_group, get_group_list, get_group_list_all, get_group, get_group_list_all, update_group, delete_group
-from app.abm.abm_user import add_user, get_user_list, get_user, get_user_list_all, update_user, delete_user
+from app.abm.abm_user import add_user, get_user_list, get_user, get_user_list_all, update_user, delete_user, get_invalid_card_list
 from app.abm.abm_at import get_task_list, get_task_list_all, add_task, get_task, update_task, delete_task
 from app.abm.abm_auto import get_auto_list, get_auto_list_all, add_auto, get_auto, update_auto, delete_auto
 from app.abm.abm_touch import add_touch, delete_touch, get_touch, get_touch_list, get_touch_list_all, update_touch
@@ -78,6 +78,7 @@ async def infoio(request: Request):
             return {f"error=3&message=HW {hw_mac_addr} tipo desconocido {hw_typ}"}
     else:
         logger.info(f"HW: {hw_mac_addr} no encontrado")
+        add_invalid_hardware(hw_mac_addr);
         return {f"error=2&message=HW {hw_mac_addr} no encontrado"}
 
 ### ABM de la configuración del sistema
@@ -149,6 +150,8 @@ async def abmhw_get(request: Request):
             return set_hardware_update_flag(id, 0, 1, 0)
         elif funcion == "update_ioconfig":
             return set_hardware_update_flag(id, 0, 0, 1)
+        elif funcion == "invalid_hw_list":
+            return get_invalid_hardware_list()
         else:
             logger.info(f"[GET abmhw] Función desconocida: {funcion}")
             return {f"error=99&message=Función: {funcion} no implementadad aún"}
@@ -374,6 +377,8 @@ async def abmuser_get(request: Request):
             return get_user_list()
         elif funcion == "listall":
             return get_user_list_all()
+        elif funcion == "invalid_card_list":
+            return get_invalid_card_list()
         else:
             logger.info(f"[GET abmuser] Función desconocida: {funcion}")
             return {f"error=3&message=Función desconocida: {funcion}"}

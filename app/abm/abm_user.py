@@ -81,6 +81,15 @@ def check_card_auth(card):
         return True
     else:
         logger.info(f"[check_card_auth] Tarjeta: {card} - No válida")
-
-
+        add_invalid_card(card)
     return False
+
+def add_invalid_card(tarjeta):
+    if mysql_execute(f"UPDATE TB_DOM_INVALID_CARD SET Time_Stamp = UNIX_TIMESTAMP() WHERE WHERE Tarjeta='{tarjeta}'") == 0:
+        if mysql_execute(f"INSERT INTO TB_DOM_INVALID_CARD (Tarjeta, Time_Stamp) VALUES ({tarjeta}, UNIX_TIMESTAMP())") > 0:
+            logger.info(f"Periferico desconocido agregado a la lista: {tarjeta}")
+
+def get_invalid_card_list():
+    mysql_execute(f"DELETE FROM TB_DOM_INVALID_CARD WHERE WHERE Time_Stamp < UNIX_TIMESTAMP() - 600")
+    query_result = mysql_query("SELECT Tarjeta FROM TB_DOM_INVALID_CARD")
+    return {"error": 0, "message": "Ok", "response": query_result}
