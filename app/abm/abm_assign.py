@@ -119,3 +119,8 @@ def add_assign_to_planta(id, planta):
     #logger.info(f"[add_assign_to_planta] Actualizando: {query}")
     mysql_execute(query)
     return {"error": 0, "message": "Ok"}
+
+#def update_assign_state(mac, port, estado):
+#    query = f"UPDATE TB_DOM_ASSIGN SET Estado = {estado} WHERE Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{mac}') AND Port = '{port}' AND (Tipo = 1 OR Tipo = 2 OR Tipo = 4 OR Tipo = 6)"
+#    #logger.info(f"[update_assign_state] Actualizando: {query}")
+#    mysql_execute(query)
