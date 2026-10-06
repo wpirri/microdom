@@ -28,7 +28,7 @@ def add_sys_config(data):
 
         if 'Creacion' not in data:
             campos.append('Creacion')
-            valores.append(f"'{datetime.now().strftime('%Y/%m/%d %H:%M:%S')}'")
+            valores.append(f"'{datetime.now().astimezone().strftime('%Y/%m/%d %H:%M:%S')}'")
 
         for key, value in data.items():
             if key == 'Id':

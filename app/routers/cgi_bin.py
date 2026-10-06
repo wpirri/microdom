@@ -3,7 +3,7 @@ from app.log_utils import get_daily_logger
 from app.dom_utils import analyze_event, get_hw_io_status, get_assign_status_id, get_assign_info_id, get_hw_update_data
 from app.abm.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, get_hardware_list_all, update_hardware, delete_hardware, set_hardware_update_flag, add_invalid_hardware, get_invalid_hardware_list
 from app.abm.abm_sys import add_sys_config, get_sys_config
-from app.abm.abm_assign import add_assign, get_assign_list, get_assign, get_assign_list_all, update_assign, delete_assign, change_assign_by_name, add_assign_to_planta
+from app.abm.abm_assign import add_assign, get_assign_list, get_assign, get_assign_list_all, update_assign, delete_assign, change_assign_by_name, add_assign_to_planta, update_assign_state
 from app.abm.abm_event import add_event, get_event_list, get_event_list_all, get_event, update_event, delete_event
 from app.abm.abm_group import add_group, get_group_list, get_group_list_all, get_group, get_group_list_all, update_group, delete_group
 from app.abm.abm_user import add_user, get_user_list, get_user, get_user_list_all, update_user, delete_user, get_invalid_card_list
@@ -69,6 +69,15 @@ async def infoio(request: Request):
             analyze_event(hw_mac_addr, CHG, 
                           IO1, IO2, IO3, IO4, IO5, IO6, IO7, IO8, 
                           OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, CARD)
+
+            update_assign_state(hw_mac_addr, "IO1", IO1)
+            update_assign_state(hw_mac_addr, "IO2", IO2)
+            update_assign_state(hw_mac_addr, "IO3", IO3)
+            update_assign_state(hw_mac_addr, "IO4", IO4)
+            update_assign_state(hw_mac_addr, "IO5", IO5)
+            update_assign_state(hw_mac_addr, "IO6", IO6)
+            update_assign_state(hw_mac_addr, "IO7", IO7)
+            update_assign_state(hw_mac_addr, "IO8", IO8)
 
             return {get_hw_io_status(hw_mac_addr) + get_hw_update_data(hw_mac_addr, UPDATEIO)}
         elif hw_typ == "TOUCH":
