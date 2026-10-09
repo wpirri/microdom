@@ -125,3 +125,17 @@ def update_assign_state(mac, port, estado):
         #logger.info(f"[update_assign_state] MAC: {mac}, Port: {port}, Estado: {estado}")
         query = f"UPDATE TB_DOM_ASSIGN SET Estado = {estado} WHERE Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{mac}') AND Port = '{port}' AND (Tipo = 1 OR Tipo = 2 OR Tipo = 4 OR Tipo = 6)"
         mysql_execute(query)
+
+def get_mobile_assign_list(grupo):
+    if grupo:
+        query_result = mysql_query(f"SELECT Id, Objeto, Tipo, Icono_Apagado, Icono_Encendido, Estado, Grupo_Visual, Planta, Cord_x, Cord_y FROM TB_DOM_ASSIGN WHERE Grupo_Visual = '{grupo}';")
+    else:
+        query_result = mysql_query("SELECT Id, Objeto, Tipo, Icono_Apagado, Icono_Encendido, Estado, Grupo_Visual, Planta, Cord_x, Cord_y, Grupo FROM TB_DOM_ASSIGN;")
+    return {"error": 0, "message": "Ok", "response": query_result if query_result else []}
+
+def switch_mobile_assign(objeto):
+    if objeto:
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado), Actualizar = 1 WHERE Objeto = '{objeto}'")
+        return {"error": 0, "message": "Ok"}
+    else:
+        return {"error": 1, "message": "Objeto es requerido"}

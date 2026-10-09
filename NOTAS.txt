@@ -1,3 +1,15 @@
+== MicroDom ==
+
+microdom                Sevicio de domotica domiciliario
+microdom_web            Estructura web del Sevicio de domotica domiciliario
+microdom_task           Gestión de tareas del Sevicio de domotica domiciliario
+
+microdom_coud           Centralizador en la nube
+microdom_coud_web       Estructura web del centralizador en la nube
+
+
+
+
 == Instalacione en un server para desarrollo
 apt install sudo build-essential vim net-tools nfs-common mc minicom libcjson1 libcjson-dev libssl-dev xinetd apache2 php libapache2-mod-php default-mysql-client default-libmysqlclient-dev dos2unix curl git tcpdump anacron openssl jq
 apt install nmap

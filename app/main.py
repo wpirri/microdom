@@ -39,6 +39,8 @@ def index():
 @app.get("/{filename}", response_class=HTMLResponse)
 def root(filename: str):
     file_path = BASE_DIR / filename
+    if filename == "m":
+        file_path = BASE_DIR / "m" / "index.html"
     # Validar existencia
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
@@ -47,6 +49,23 @@ def root(filename: str):
 @app.get("/data/{filename}", response_class=HTMLResponse)
 def root_data(filename: str):
     file_path = BASE_DIR / "data" / filename
+    # Validar existencia
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+    return FileResponse(file_path)
+
+# Movil
+@app.get("/m/", response_class=HTMLResponse)
+def index():
+    file_path = BASE_DIR / "m" / "index.html"
+    # Validar existencia
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+    return FileResponse(file_path)
+
+@app.get("/m/{filename}", response_class=HTMLResponse)
+def root(filename: str):
+    file_path = BASE_DIR / "m" / filename
     # Validar existencia
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")

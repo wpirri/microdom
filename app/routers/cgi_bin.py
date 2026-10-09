@@ -3,7 +3,7 @@ from app.log_utils import get_daily_logger
 from app.dom_utils import analyze_event, get_hw_io_status, get_assign_status_id, get_assign_info_id, get_hw_update_data
 from app.abm.abm_hw import check_hw, get_hardware_list, get_hardware, add_hardware, get_hardware_list_all, update_hardware, delete_hardware, set_hardware_update_flag, add_invalid_hardware, get_invalid_hardware_list
 from app.abm.abm_sys import add_sys_config, get_sys_config
-from app.abm.abm_assign import add_assign, get_assign_list, get_assign, get_assign_list_all, update_assign, delete_assign, change_assign_by_name, add_assign_to_planta, update_assign_state
+from app.abm.abm_assign import add_assign, get_assign_list, get_assign, get_assign_list_all, update_assign, delete_assign, change_assign_by_name, add_assign_to_planta, update_assign_state, get_mobile_assign_list, switch_mobile_assign
 from app.abm.abm_event import add_event, get_event_list, get_event_list_all, get_event, update_event, delete_event
 from app.abm.abm_group import add_group, get_group_list, get_group_list_all, get_group, get_group_list_all, update_group, delete_group
 from app.abm.abm_user import add_user, get_user_list, get_user, get_user_list_all, update_user, delete_user, get_invalid_card_list
@@ -606,3 +606,23 @@ async def hwconfig_post(request: Request):
         logger.info(f"[hwconfig.cgi] Funcion: {funcion}")
 
     return {f"error=0&message=Ok"}
+
+## dompi_mobile
+@router.get("/dompi_mobile.cgi")
+async def dompi_mobile_get(request: Request):
+    # Parámetros GET (query string)
+    request_params = dict(request.query_params)
+    # Headers (variables del navegador)
+    headers = dict(request.headers)
+
+    # Me abro por función
+    funcion = request_params.get("funcion", None)
+    grupo = request_params.get("Grupo", None)
+    objeto = request_params.get("Objeto", None)
+
+    if funcion == "list":
+        return get_mobile_assign_list(grupo)
+    elif funcion == "touch":
+        return switch_mobile_assign(objeto)
+    else:
+        return {f"error=3&message=Función no informada"}
