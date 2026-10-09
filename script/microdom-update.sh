@@ -45,3 +45,7 @@ docker run -it \
   -p 8081:8081 \
   ghcr.io/wpirri/microdom-task:latest
 
+echo "==== Arbol WEB ===="
+git clone https://github.com/wpirri/microdom_web.git
+cd microdom_web
+./install.sh
