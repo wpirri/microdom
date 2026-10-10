@@ -4,6 +4,22 @@ from fastapi.responses import Response
 
 logger = get_daily_logger()
 
+def check_hw(mac_addr, ip_address, info):
+    # Verificar si el periférico ya existe
+    if mac_addr != None:
+        query_result = mysql_query(f"SELECT * FROM TB_DOM_PERIF WHERE MAC = '{mac_addr}'")
+    else:
+        query_result = mysql_query(f"SELECT * FROM TB_DOM_PERIF WHERE Direccion_IP = '{ip_address}'")
+
+    if query_result:
+        if query_result[0]["Estado"] == 0:
+            logger.info(f"HW: {query_result[0]['Dispositivo']} OFFLINE -> ONLINE")
+        # Actualizar el periférico existente
+        mysql_execute(f"UPDATE TB_DOM_PERIF SET Direccion_IP = '{ip_address}', Ultimo_Ok = UNIX_TIMESTAMP(), Estado = 1, Informacion = '{info}' WHERE MAC = '{mac_addr}'")
+        return query_result[0]['Dispositivo'] 
+    else:
+        # HW no existe
+        return None
 
 def get_touch_download_list(ip_adddr):
     """
@@ -29,12 +45,12 @@ def get_touch_download_list(ip_adddr):
     #content += "/download/wifi1.bmp\n"
     content += "/download/config.csv\n"
     content += "/download/offline.csv\n"
-    content += "/cgi-bin/hwconfig.cgi?screen=0\n"
-    content += "/cgi-bin/hwconfig.cgi?screen=1\n"
-    content += "/cgi-bin/hwconfig.cgi?screen=2\n"
-    content += "/cgi-bin/hwconfig.cgi?screen=3\n"
-    content += "/cgi-bin/hwconfig.cgi?screen=4\n"
-    content += "/cgi-bin/hwconfig.cgi?screen=5\n"
+    content += "/abm/hwconfig?screen=0\n"
+    content += "/abm/hwconfig?screen=1\n"
+    content += "/abm/hwconfig?screen=2\n"
+    content += "/abm/hwconfig?screen=3\n"
+    content += "/abm/hwconfig?screen=4\n"
+    content += "/abm/hwconfig?screen=5\n"
 
     headers = {"Content-Disposition": "attachment; filename=download.lst"}
     return Response(content=content, media_type="text/plain", headers=headers)
@@ -120,3 +136,8 @@ def get_touch_download_screen(ip_adddr, screen_nro):
 
     headers = {"Content-Disposition": f"attachment; filename=screen{screen_nro}.csv"}
     return Response(content=content, media_type="text/plain", headers=headers)
+
+def add_invalid_hardware(mac):
+    if mysql_execute(f"UPDATE TB_DOM_INVALID_PERIF SET Time_Stamp = UNIX_TIMESTAMP() WHERE WHERE MAC='{mac}'") == 0:
+        if mysql_execute(f"INSERT INTO TB_DOM_INVALID_PERIF (MAC, Time_Stamp) VALUES ({mac}, UNIX_TIMESTAMP())") > 0:
+            logger.info(f"Periferico desconocido agregado a la lista: {mac}")

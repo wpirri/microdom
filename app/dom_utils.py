@@ -1,8 +1,5 @@
 from app.log_utils import get_daily_logger
-from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
-from app.abm.abm_user import check_card_auth
-from app.abm.abm_assign import change_assign_by_id
-from app.abm.abm_group import change_group_by_id
+from app.mysql_utils import mysql_execute, mysql_query
 
 logger = get_daily_logger()
 
@@ -180,3 +177,93 @@ def get_assign_info_id(id, planta):
             query_result = mysql_query("SELECT Id,Objeto,Tipo,Icono_Apagado,Icono_Encendido,Grupo_Visual,Planta,Cord_x,Cord_y FROM TB_DOM_ASSIGN;")
 
     return {"error": 0, "message": "Ok", "response": query_result if query_result else []}
+
+def update_assign_state(mac, port, estado):
+    if mac != None and port != None and estado != None:
+        #logger.info(f"[update_assign_state] MAC: {mac}, Port: {port}, Estado: {estado}")
+        query = f"UPDATE TB_DOM_ASSIGN SET Estado = {estado} WHERE Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{mac}') AND Port = '{port}' AND (Tipo = 1 OR Tipo = 2 OR Tipo = 4 OR Tipo = 6)"
+        mysql_execute(query)
+
+def change_assign_by_id(id, accion, parametro=0):
+    if accion == 1:
+        logger.info(f"[change_assign_by_id] Encender: {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1, Actualizar = 1 WHERE Id = {id}")
+    elif accion == 2:
+        logger.info(f"[change_assign_by_id] Apagar: {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 0, Actualizar = 1 WHERE Id = {id}")
+    elif accion == 3:
+        logger.info(f"[change_assign_by_id] Alternar: {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado), Actualizar = 1 WHERE Id = {id}")
+    elif accion == 4:
+        if parametro == 0:
+            parametro = 1  # Valor por defecto para la duración del pulso
+        logger.info(f"[change_assign_by_id] Pulso de: {parametro}s a: {id}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}), Actualizar = 1 WHERE Id = {id}")
+    else:
+        logger.warning(f"change_assign_by_id: acción desconocida {accion} para Id={id}")
+
+def change_assign_by_name(name, accion, parametro=0):
+    if accion == 1:
+        logger.info(f"[change_assign_by_name] Encender: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 1, Actualizar = 1 WHERE Objeto = '{name}'")
+    elif accion == 2:
+        logger.info(f"[change_assign_by_name] Apagar: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = 0, Actualizar = 1 WHERE Objeto = '{name}'")
+    elif accion == 3:
+        logger.info(f"[change_assign_by_name] Alternar: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 - Estado), Actualizar = 1 WHERE Objeto = '{name}'")
+    elif accion == 4:
+        if parametro == 0:
+            parametro = 1  # Valor por defecto para la duración del pulso
+        logger.info(f"[change_assign_by_name] Pulso de: {parametro}s a: {name}")
+        mysql_execute(f"UPDATE TB_DOM_ASSIGN SET Estado = (1 + {parametro}), Actualizar = 1 WHERE Objeto = '{name}'")
+    else:
+        logger.warning(f"change_assign_by_name: acción desconocida {accion} para Objeto={name}")
+
+def change_group_by_id(id, accion, parametro=0):
+    query_result = mysql_query(f"SELECT Estado, Listado_Objetos FROM TB_DOM_GROUP WHERE Id = {id};");
+    estado_grupo = query_result[0]['Estado']
+    objetos = query_result[0]['Listado_Objetos'].split(",")
+
+    if accion == 1:
+        logger.info(f"[change_group_by_id] Encender: {id}")
+        estado_grupo = 1
+    elif accion == 2:
+        logger.info(f"[change_group_by_id] Apagar: {id}")
+        estado_grupo = 0
+    elif accion == 3:
+        logger.info(f"[change_group_by_id] Alternar: {id}")
+        estado_grupo = 1 - estado_grupo
+    elif accion == 4:
+        logger.info(f"[change_group_by_id] Pulso de: {parametro}s a: {id} - NO IMPLEMENTADO")
+
+    else:
+        logger.warning(f"change_group_by_id: acción desconocida {accion} para Id={id}")
+
+    for obj in objetos:
+        if obj:
+            if estado_grupo == 1:
+                logger.info(f"[change_group_by_id] Encender: {obj}")
+                change_assign_by_id(obj, 1)
+            elif estado_grupo == 0:
+                logger.info(f"[change_group_by_id] Apagar: {obj}")
+                change_assign_by_id(obj, 2)
+
+    mysql_execute(f"UPDATE TB_DOM_GROUP SET Estado = {estado_grupo}, Actualizar = 1 WHERE Id = {id};")
+
+    return len(objetos)
+
+def check_card_auth(card):
+    query = f"SELECT * FROM TB_DOM_USER WHERE Tarjeta = '{card}'"
+    query_result = mysql_query(query)
+    if query_result:
+        for i in range(0, len(query_result)):
+            nombre = query_result[i]['Nombre_Completo']
+            logger.info(f"[check_card_auth] Tarjeta: {card} - Usuario; {nombre}")
+            
+        return True
+    else:
+        logger.info(f"[check_card_auth] Tarjeta: {card} - No válida")
+        add_invalid_card(card)
+    return False
+
