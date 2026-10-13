@@ -82,14 +82,14 @@ async def infoio(request: Request):
         add_invalid_hardware(hw_mac_addr);
         return {f"error=2&message=HW {hw_mac_addr} no encontrado"}
 
-@router.post("/switch")
+@router.get("/switch")
 def switch(request: Request):
     request_params = dict(request.query_params)
     objeto = request_params.get("Objeto", None)
     change_assign_by_name(objeto, 3)
     return {"error=0&message=Ok"}
 
-@router.post("/pulse")
+@router.get("/pulse")
 def pulse(request: Request):
     request_params = dict(request.query_params)
     objeto = request_params.get("Objeto", None)
