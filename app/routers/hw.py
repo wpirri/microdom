@@ -78,7 +78,6 @@ async def infoio(request: Request):
             logger.info(f"HW: {hw_mac_addr} tipo desconocido {hw_typ}")
             return {f"error=3&message=HW {hw_mac_addr} tipo desconocido {hw_typ}"}
     else:
-        logger.info(f"HW: {hw_mac_addr} no encontrado")
         add_invalid_hardware(hw_mac_addr);
         return {f"error=2&message=HW {hw_mac_addr} no encontrado"}
 

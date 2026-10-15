@@ -149,7 +149,8 @@ Guardarlo, no se repite.
 Configurar almacen permanente de contraseñas en git
     git config --global credential.helper store
 Usar el PAT como contraseñas
-
+    export GHCR_TOKEN=ghp_...
+    echo $GHCR_TOKEN | docker login ghcr.io -u wpirri --password-stdin
 
 Para subir a GHCR
     docker build -t microdom:latest .

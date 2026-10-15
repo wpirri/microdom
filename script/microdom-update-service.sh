@@ -66,8 +66,3 @@ docker run -it \
   -v /var/lib/microdom/download:/app/download \
   -p 8082:8082 \
   ghcr.io/wpirri/microdom-abm:latest
-
-echo "==== Arbol WEB ===="
-git clone https://github.com/wpirri/microdom_web.git
-cd microdom_web
-./install.sh

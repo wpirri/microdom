@@ -27,6 +27,10 @@ def get_touch_download_list(ip_adddr):
     El archivo contendrá tres líneas con el texto "texto de prueba" y se
     enviará como adjunto con el nombre `lista.txt`.
     """
+    query_result = mysql_query(f"SELECT MAX( T.Pantalla ) FROM TB_DOM_PERIF AS P, TB_DOM_TOUCH AS T WHERE P.Id = T.Dispositivo AND P.Direccion_IP = '{ip_adddr}'")
+    if query_result and query_result[0]:
+        max_screen = query_result[0]['MAX( T.Pantalla )']
+
     content = "# Lista de descargas\n"
     content += f"# para: {ip_adddr}\n"
     #content += "/download/download.bmp\n"
@@ -43,14 +47,10 @@ def get_touch_download_list(ip_adddr):
     #content += "/download/restart.bmp\n"
     #content += "/download/wifi.bmp\n"
     #content += "/download/wifi1.bmp\n"
-    content += "/download/config.csv\n"
-    content += "/download/offline.csv\n"
-    content += "/abm/hwconfig?screen=0\n"
-    content += "/abm/hwconfig?screen=1\n"
-    content += "/abm/hwconfig?screen=2\n"
-    content += "/abm/hwconfig?screen=3\n"
-    content += "/abm/hwconfig?screen=4\n"
-    content += "/abm/hwconfig?screen=5\n"
+    #content += "/download/config.csv\n"
+    #content += "/download/offline.csv\n"
+    for screen in range(0, max_screen + 1):
+        content += f"/hw/hwconfig?screen={screen}\n"
 
     headers = {"Content-Disposition": "attachment; filename=download.lst"}
     return Response(content=content, media_type="text/plain", headers=headers)
@@ -138,6 +138,6 @@ def get_touch_download_screen(ip_adddr, screen_nro):
     return Response(content=content, media_type="text/plain", headers=headers)
 
 def add_invalid_hardware(mac):
-    if mysql_execute(f"UPDATE TB_DOM_INVALID_PERIF SET Time_Stamp = UNIX_TIMESTAMP() WHERE WHERE MAC='{mac}'") == 0:
-        if mysql_execute(f"INSERT INTO TB_DOM_INVALID_PERIF (MAC, Time_Stamp) VALUES ({mac}, UNIX_TIMESTAMP())") > 0:
-            logger.info(f"Periferico desconocido agregado a la lista: {mac}")
+    if mysql_execute(f"UPDATE TB_DOM_INVALID_PERIF SET Ultimo = UNIX_TIMESTAMP() WHERE MAC='{mac}'") == 0:
+        if mysql_execute(f"INSERT INTO TB_DOM_INVALID_PERIF (MAC, Ultimo) VALUES ('{mac}', UNIX_TIMESTAMP())") > 0:
+            logger.info(f"HW: {mac} desconocido")
