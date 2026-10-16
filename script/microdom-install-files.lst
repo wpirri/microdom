@@ -1,0 +1,7 @@
+microdom-install-service.sh
+/etc/microdom.conf
+/var/lib/microdom/html
+/var/lib/microdom/download
+/opt/microdom
+/etc/apache2/sites-available/proxy-ssl-microdom-abm.conf
+
