@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Request, Form
+from fastapi.concurrency import run_in_threadpool
 from app.log_utils import get_daily_logger
 from app.hw_utils import get_touch_download_list, get_touch_download_screen, add_invalid_hardware, check_hw
-from app.dom_utils import analyze_event, get_hw_io_status, get_hw_update_data, update_assign_state, change_assign_by_name
+from app.dom_utils import analyze_event, get_hw_io_status, get_hw_update_data, update_assign_state, update_assign_states_bulk, change_assign_by_name
 
 logger = get_daily_logger()
 
@@ -14,22 +15,19 @@ router = APIRouter(prefix="/hw", tags=["hw"])
 @router.post("/infoio")
 @router.post("/infoio.cgi")
 async def infoio(request: Request):
-    raddr = request.client.host
+    raddr = request.client.host if request.client else "0.0.0.0"
     # Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
     data = dict(form)
+    return await run_in_threadpool(_process_infoio, data, raddr)
+
+def _process_infoio(data: dict, raddr: str):
     # Información del dispositivo
     hw_mac_addr = data.get("ID", "NULL").upper()
     hw_typ = data.get("TYP", None)
     FW = data.get("FW", None)
     AT = data.get("AT", None)
     SDK = data.get("SDK", None)
-    # Si el dice que estuvo offline
-    OFFLINE = data.get("OFFLINE", None)
-    # Parámetros GET (query string)
-    request_params = dict(request.query_params)
-    # Leer headers (variables del navegador)
-    headers = dict(request.headers)
 
     # Busco el dispositivo por MAC
     Dispositivo = check_hw(hw_mac_addr, raddr, f"FW:{FW} AT:{AT} SDK:{SDK}")
@@ -62,14 +60,10 @@ async def infoio(request: Request):
                           IO1, IO2, IO3, IO4, IO5, IO6, IO7, IO8, 
                           OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8, CARD)
 
-            update_assign_state(hw_mac_addr, "IO1", IO1)
-            update_assign_state(hw_mac_addr, "IO2", IO2)
-            update_assign_state(hw_mac_addr, "IO3", IO3)
-            update_assign_state(hw_mac_addr, "IO4", IO4)
-            update_assign_state(hw_mac_addr, "IO5", IO5)
-            update_assign_state(hw_mac_addr, "IO6", IO6)
-            update_assign_state(hw_mac_addr, "IO7", IO7)
-            update_assign_state(hw_mac_addr, "IO8", IO8)
+            update_assign_states_bulk(hw_mac_addr, {
+                "IO1": IO1, "IO2": IO2, "IO3": IO3, "IO4": IO4,
+                "IO5": IO5, "IO6": IO6, "IO7": IO7, "IO8": IO8
+            })
 
             return {get_hw_io_status(hw_mac_addr) + get_hw_update_data(hw_mac_addr, UPDATEIO)}
         elif hw_typ == "TOUCH":
@@ -78,7 +72,7 @@ async def infoio(request: Request):
             logger.info(f"HW: {hw_mac_addr} tipo desconocido {hw_typ}")
             return {f"error=3&message=HW {hw_mac_addr} tipo desconocido {hw_typ}"}
     else:
-        add_invalid_hardware(hw_mac_addr);
+        add_invalid_hardware(hw_mac_addr)
         return {f"error=2&message=HW {hw_mac_addr} no encontrado"}
 
 @router.get("/switch")

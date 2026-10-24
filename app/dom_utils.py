@@ -155,7 +155,7 @@ def get_hw_update_data(hw_mac_addr, update_io=None):
                 
             mysql_execute(f"UPDATE TB_DOM_PERIF SET Update_Config = 0 WHERE MAC = '{hw_mac_addr}'")
     # Devuelvo todas las configuraciones juntas
-    return firmware + wiegand + io_config + wifi_config
+    return firmware + io_config + wifi_config
 
 def get_assign_status_id(id, planta):
     if id:
@@ -181,8 +181,24 @@ def get_assign_info_id(id, planta):
 def update_assign_state(mac, port, estado):
     if mac != None and port != None and estado != None:
         #logger.info(f"[update_assign_state] MAC: {mac}, Port: {port}, Estado: {estado}")
-        query = f"UPDATE TB_DOM_ASSIGN SET Estado = {estado} WHERE Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{mac}') AND Port = '{port}' AND (Tipo = 1 OR Tipo = 2 OR Tipo = 4 OR Tipo = 6)"
+        query = f"UPDATE TB_DOM_ASSIGN SET Estado = {estado} WHERE Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{mac}') AND Port = '{port}' AND (Tipo = 1 OR Tipo = 2 OR Tipo = 4 OR Tipo = 6) AND Estado != {estado}"
         mysql_execute(query)
+
+def update_assign_states_bulk(mac, io_dict):
+    valid_ios = {port: val for port, val in io_dict.items() if val is not None}
+    if not mac or not valid_ios:
+        return
+    cases = " ".join([f"WHEN '{port}' THEN {val}" for port, val in valid_ios.items()])
+    ports_in = ", ".join([f"'{port}'" for port in valid_ios.keys()])
+    query = (
+        f"UPDATE TB_DOM_ASSIGN "
+        f"SET Estado = CASE Port {cases} END "
+        f"WHERE Dispositivo = (SELECT Id FROM TB_DOM_PERIF WHERE MAC = '{mac}') "
+        f"AND Port IN ({ports_in}) "
+        f"AND (Tipo = 1 OR Tipo = 2 OR Tipo = 4 OR Tipo = 6) "
+        f"AND Estado != CASE Port {cases} END"
+    )
+    mysql_execute(query)
 
 def change_assign_by_id(id, accion, parametro=0):
     if accion == 1:
@@ -221,7 +237,9 @@ def change_assign_by_name(name, accion, parametro=0):
         logger.warning(f"change_assign_by_name: acción desconocida {accion} para Objeto={name}")
 
 def change_group_by_id(id, accion, parametro=0):
-    query_result = mysql_query(f"SELECT Estado, Listado_Objetos FROM TB_DOM_GROUP WHERE Id = {id};");
+    query_result = mysql_query(f"SELECT Estado, Listado_Objetos FROM TB_DOM_GROUP WHERE Id = {id};")
+    if not query_result:
+        return 0
     estado_grupo = query_result[0]['Estado']
     objetos = query_result[0]['Listado_Objetos'].split(",")
 
@@ -267,3 +285,9 @@ def check_card_auth(card):
         add_invalid_card(card)
     return False
 
+def add_invalid_card(tarjeta):
+    mysql_execute(
+        f"INSERT INTO TB_DOM_INVALID_CARD (Tarjeta, Ultimo) VALUES ('{tarjeta}', UNIX_TIMESTAMP()) "
+        f"ON DUPLICATE KEY UPDATE Ultimo = UNIX_TIMESTAMP()"
+    )
+    logger.info(f"Tarjeta desconocida agregada a la lista: {tarjeta}")

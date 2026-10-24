@@ -145,7 +145,8 @@ Actualizar integer DEFAULT 0,               -- Actualizar a la nube
 Flags integer DEFAULT 0,
 FOREIGN KEY(Dispositivo) REFERENCES TB_DOM_PERIF(Id),
 FOREIGN KEY(Grupo_Visual) REFERENCES TB_DOM_GRUPO_VISUAL(Id),
-UNIQUE INDEX idx_assign_id (Id)
+UNIQUE INDEX idx_assign_id (Id),
+INDEX idx_assign_disp_port (Dispositivo, Port)
 );
 
 CREATE TABLE IF NOT EXISTS TB_DOM_GROUP (

@@ -72,5 +72,5 @@ docker run -it \
   -v /var/log/microdom:/app/logs \
   -v /var/lib/microdom/html:/app/html \
   -v /var/lib/microdom/download:/app/download \
-  -p 8082:8082 \
+  -p 8083:8083 \
   ghcr.io/wpirri/microdom-abm:latest
