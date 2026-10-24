@@ -1,13 +1,8 @@
 #!/bin/sh
 
 echo "==== Servicio microdom ===="
-echo "Stop..."
 docker stop microdom
-sleep 1
-echo "Remove..."
 docker rm microdom
-sleep 1
-echo "Update & Start..."
 docker pull ghcr.io/wpirri/microdom:latest
 docker run -it \
   -d --restart unless-stopped \
@@ -24,13 +19,8 @@ docker run -it \
   ghcr.io/wpirri/microdom:latest
 
 echo "==== Servicio microdom-task ===="
-echo "Stop..."
 docker stop microdom-task
-sleep 1
-echo "Remove..."
 docker rm microdom-task
-sleep 1
-echo "Update & Start..."
 docker pull ghcr.io/wpirri/microdom-task:latest
 docker run -it \
   -d --restart unless-stopped \
@@ -45,13 +35,8 @@ docker run -it \
   ghcr.io/wpirri/microdom-task:latest
 
 echo "==== Servicio microdom-abm ===="
-echo "Stop..."
 docker stop microdom-abm
-sleep 1
-echo "Remove..."
 docker rm microdom-abm
-sleep 1
-echo "Update & Start..."
 docker pull ghcr.io/wpirri/microdom-abm:latest
 docker run -it \
   -d --restart unless-stopped \
