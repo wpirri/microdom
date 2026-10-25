@@ -104,8 +104,10 @@ def get_hw_update_data(hw_mac_addr, update_io=None):
                 wifi_config += f"&ap1p={config.get('Wifi_AP1_Pass', '')}"
                 wifi_config += f"&ap2={config.get('Wifi_AP2', '')}"
                 wifi_config += f"&ap2p={config.get('Wifi_AP2_Pass', '')}"
-                wifi_config += f"&ce1={config.get('Home_Host_1_Address', '')}"
-                wifi_config += f"&ce2={config.get('Home_Host_2_Address', '')}"
+                ce1 = config.get('Home_Host_1_Address', '')
+                ce2 = config.get('Home_Host_2_Address', '') or ce1
+                wifi_config += f"&ce1={ce1}"
+                wifi_config += f"&ce2={ce2}"
                 #
                 if query_result[0]['Tipo'] == 1:
                     wifi_config += f"&rep=1"

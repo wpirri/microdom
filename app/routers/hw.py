@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import PlainTextResponse
 from app.log_utils import get_daily_logger
 from app.hw_utils import get_touch_download_list, get_touch_download_screen, add_invalid_hardware, check_hw
 from app.dom_utils import analyze_event, get_hw_io_status, get_hw_update_data, update_assign_state, update_assign_states_bulk, change_assign_by_name
@@ -12,8 +13,8 @@ router = APIRouter(prefix="/hw", tags=["hw"])
 #       'OUT1': '0', 'OUT2': '0', 'OUT3': '0', 'OUT4': '1', 
 #       'CHG': 'IO1', 'ONLINE': '1', 
 #       'AT': '1.7.3.0(Mar 19 2020 18:15:04)', 'SDK': '3.0.3(8427744)', 'FW': 'Feb  6 2026 12:28:06'}
-@router.post("/infoio")
-@router.post("/infoio.cgi")
+@router.post("/infoio", response_class=PlainTextResponse)
+@router.post("/infoio.cgi", response_class=PlainTextResponse)
 async def infoio(request: Request):
     raddr = request.client.host if request.client else "0.0.0.0"
     # Leer el POST
@@ -65,30 +66,30 @@ def _process_infoio(data: dict, raddr: str):
                 "IO5": IO5, "IO6": IO6, "IO7": IO7, "IO8": IO8
             })
 
-            return {get_hw_io_status(hw_mac_addr) + get_hw_update_data(hw_mac_addr, UPDATEIO)}
+            return get_hw_io_status(hw_mac_addr) + get_hw_update_data(hw_mac_addr, UPDATEIO)
         elif hw_typ == "TOUCH":
-            return {"error=0&message=Ok" + get_hw_update_data(hw_mac_addr)}
+            return "error=0&message=Ok" + get_hw_update_data(hw_mac_addr)
         else:
             logger.info(f"HW: {hw_mac_addr} tipo desconocido {hw_typ}")
-            return {f"error=3&message=HW {hw_mac_addr} tipo desconocido {hw_typ}"}
+            return f"error=3&message=HW {hw_mac_addr} tipo desconocido {hw_typ}"
     else:
         add_invalid_hardware(hw_mac_addr)
-        return {f"error=2&message=HW {hw_mac_addr} no encontrado"}
+        return f"error=2&message=HW {hw_mac_addr} no encontrado"
 
-@router.get("/switch")
+@router.get("/switch", response_class=PlainTextResponse)
 def switch(request: Request):
     request_params = dict(request.query_params)
     objeto = request_params.get("Objeto", None)
     change_assign_by_name(objeto, 3)
-    return {"error=0&message=Ok"}
+    return "error=0&message=Ok"
 
-@router.get("/pulse")
+@router.get("/pulse", response_class=PlainTextResponse)
 def pulse(request: Request):
     request_params = dict(request.query_params)
     objeto = request_params.get("Objeto", None)
     s = request_params.get("Segundos", None)
     change_assign_by_name(objeto, 4, s)
-    return {"error=0&message=Ok"}
+    return "error=0&message=Ok"
 
 ### Configuracion de HW
 @router.get("/hwconfig")
@@ -105,7 +106,7 @@ async def hwconfig_get(request: Request):
     else:
         return get_touch_download_list(request.client.host)
 
-@router.post("/hwconfig")
+@router.post("/hwconfig", response_class=PlainTextResponse)
 async def hwconfig_post(request: Request):
     # Leer el POST
     form = await request.form()   # ← parsea x-www-form-urlencoded
@@ -120,5 +121,5 @@ async def hwconfig_post(request: Request):
     if funcion:
         logger.info(f"[hwconfig] Funcion: {funcion}")
 
-    return {f"error=0&message=Ok"}
+    return "error=0&message=Ok"
 
