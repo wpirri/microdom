@@ -1,8 +1,19 @@
+import asyncio
+import time
+import threading
 from app.log_utils import get_daily_logger
 from app.mysql_utils import mysql_execute, mysql_query, mysql_next_id
 from fastapi.responses import Response
 
 logger = get_daily_logger()
+
+tabla_perif = []
+_tabla_perif_lock = threading.Lock()
+
+def init_hw_status():
+    mysql_execute("UPDATE TB_DOM_PERIF SET Estado = 0;")
+    with _tabla_perif_lock:
+        tabla_perif.clear()
 
 def check_hw(mac_addr, ip_address, info):
     # Verificar si el periférico ya existe
@@ -12,14 +23,49 @@ def check_hw(mac_addr, ip_address, info):
         query_result = mysql_query(f"SELECT * FROM TB_DOM_PERIF WHERE Direccion_IP = '{ip_address}'")
 
     if query_result:
-        if query_result[0]["Estado"] == 0:
+        ahora = int(time.time())
+        mac_key = (mac_addr if mac_addr is not None else query_result[0]["MAC"]).upper()
+        Dispositivo = query_result[0]['Dispositivo']
+        cambiar_estado = False
+
+        with _tabla_perif_lock:
+            perif = next((p for p in tabla_perif if p["MAC"] == mac_key), None)
+            if perif is None:
+                perif = {"MAC": mac_key, "Dispositivo": Dispositivo, "Ultimo_Ok": ahora, "Estado": 1}
+                tabla_perif.append(perif)
+                cambiar_estado = True
+            else:
+                perif["Dispositivo"] = Dispositivo
+                perif["Ultimo_Ok"] = ahora
+                if perif["Estado"] == 0 or query_result[0]["Estado"] == 0:
+                    perif["Estado"] = 1
+                    cambiar_estado = True
+
+        if cambiar_estado:
             logger.info(f"HW: {query_result[0]['Dispositivo']} OFFLINE -> ONLINE")
-        # Actualizar el periférico existente
-        mysql_execute(f"UPDATE TB_DOM_PERIF SET Direccion_IP = '{ip_address}', Ultimo_Ok = UNIX_TIMESTAMP(), Estado = 1, Informacion = '{info}' WHERE MAC = '{mac_addr}'")
+            # Actualizar el periférico existente solo al cambiar de estado
+            mysql_execute(f"UPDATE TB_DOM_PERIF SET Direccion_IP = '{ip_address}', Estado = 1, Informacion = '{info}' WHERE MAC = '{mac_key}'")
+
         return query_result[0]['Dispositivo'] 
     else:
         # HW no existe
         return None
+
+def check_perif_timeout():
+    ahora = int(time.time())
+
+    with _tabla_perif_lock:
+        for perif in tabla_perif:
+            if perif["Estado"] != 0 and perif["Ultimo_Ok"] < (ahora - 30):
+                perif["Estado"] = 0
+                logger.info(f"HW: {perif['Dispositivo']} ONLINE -> OFFLINE")
+                mysql_execute(f"UPDATE TB_DOM_PERIF SET Estado = 0 WHERE MAC = '{perif['MAC']}';")
+
+
+async def hw_worker_loop():
+    while True:
+        await asyncio.sleep(10)
+        await asyncio.to_thread(check_perif_timeout)
 
 def get_touch_download_list(ip_adddr):
     """

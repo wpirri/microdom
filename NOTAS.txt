@@ -223,7 +223,7 @@ sudo tcpdump -nv tcp port 8080
     192.168.10.174.38036 > 192.168.10.24.8080: Flags [.], cksum 0xc647 (correct), ack 1, win 2920, length 0
 22:06:40.382246 IP (tos 0x0, ttl 128, id 98, offset 0, flags [DF], proto TCP (6), length 447)
     192.168.10.174.38036 > 192.168.10.24.8080: Flags [P.], cksum 0x22e8 (correct), seq 1:408, ack 1, win 2920, length 407: HTTP, length: 407
-        POST /cgi-bin/infoio.cgi HTTP/1.1
+        POST /cgi-bin/infoio HTTP/1.1
         Host: 192.168.10.24
         Connection: keep-alive
         Content-Length: 183

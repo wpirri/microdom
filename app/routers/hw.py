@@ -8,13 +8,12 @@ from app.dom_utils import analyze_event, get_hw_io_status, get_hw_update_data, u
 logger = get_daily_logger()
 
 router = APIRouter(prefix="/hw", tags=["hw"])
-# 2026-04-04 03:12:36,583 - INFO - [infoio.cgi] 
+# 2026-04-04 03:12:36,583 - INFO - [infoio] 
 # FORM={'ID': 'c8c9a34a61af', 'TYP': 'IO', 'IO1': '0', 'IO2': '0', 'IO3': '0', 'IO4': '1', 'IO5': '0', 'IO6': '0', 
 #       'OUT1': '0', 'OUT2': '0', 'OUT3': '0', 'OUT4': '1', 
 #       'CHG': 'IO1', 'ONLINE': '1', 
 #       'AT': '1.7.3.0(Mar 19 2020 18:15:04)', 'SDK': '3.0.3(8427744)', 'FW': 'Feb  6 2026 12:28:06'}
 @router.post("/infoio", response_class=PlainTextResponse)
-@router.post("/infoio.cgi", response_class=PlainTextResponse)
 async def infoio(request: Request):
     raddr = request.client.host if request.client else "0.0.0.0"
     # Leer el POST

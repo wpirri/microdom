@@ -1,9 +1,11 @@
+import asyncio
 import socket
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from app.log_utils import get_daily_logger
+from app.hw_utils import init_hw_status, hw_worker_loop
 
 from app.routers import download, hw
 
@@ -118,6 +120,11 @@ app = FastAPI(
 )
 
 logger = get_daily_logger()
+
+@app.on_event("startup")
+async def startup_event():
+    await asyncio.to_thread(init_hw_status)
+    asyncio.create_task(hw_worker_loop())
 
 # Routers existentes
 app.include_router(download.router)
