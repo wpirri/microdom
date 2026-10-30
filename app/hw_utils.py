@@ -168,6 +168,8 @@ def get_touch_download_screen(ip_adddr, screen_nro):
                 content += f"SWITCH:"
             elif query_result[i]['Evento'] == 4:
                 content += f"PULSO:"
+            elif query_result[i]['Evento'] == 9:
+                content += f"DEBUG:"
             elif query_result[i]['Evento'] == 10:
                 content += f"CONFIG:"
             elif query_result[i]['Evento'] == 11:
