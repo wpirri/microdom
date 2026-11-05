@@ -51,3 +51,4 @@ docker run -it \
   -v /var/lib/microdom/download:/app/download \
   -p 8083:8083 \
   ghcr.io/wpirri/microdom-abm:latest
+

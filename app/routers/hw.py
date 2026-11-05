@@ -25,15 +25,16 @@ def _process_infoio(data: dict, raddr: str):
     # Información del dispositivo
     hw_mac_addr = data.get("ID", "NULL").upper()
     hw_typ = data.get("TYP", None)
+    LVL = data.get("LVL", None)
     FW = data.get("FW", None)
     AT = data.get("AT", None)
     SDK = data.get("SDK", None)
+    OFFLINE = data.get("OFFLINE", "0")
 
     # Busco el dispositivo por MAC
-    Dispositivo = check_hw(hw_mac_addr, raddr, f"FW:{FW} AT:{AT} SDK:{SDK}")
+    Dispositivo = check_hw(hw_mac_addr, raddr, f"LVL:{LVL} FW:{FW} AT:{AT} SDK:{SDK}", OFFLINE)
     if Dispositivo:
-        OFFLINE = data.get("OFFLINE", None)
-        if OFFLINE:
+        if OFFLINE == "1":
             logger.info(f"HW: {Dispositivo} estuvo OFFLINE (Firmware: {FW})")
         if hw_typ == "IO":
             IO1 = data.get("IO1", None)
