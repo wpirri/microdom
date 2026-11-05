@@ -15,7 +15,7 @@ def init_hw_status():
     with _tabla_perif_lock:
         tabla_perif.clear()
 
-def check_hw(mac_addr, ip_address, info):
+def check_hw(mac_addr, ip_address, info, offline):
     # Verificar si el periférico ya existe
     if mac_addr != None:
         query_result = mysql_query(f"SELECT * FROM TB_DOM_PERIF WHERE MAC = '{mac_addr}'")
@@ -26,23 +26,28 @@ def check_hw(mac_addr, ip_address, info):
         ahora = int(time.time())
         mac_key = (mac_addr if mac_addr is not None else query_result[0]["MAC"]).upper()
         Dispositivo = query_result[0]['Dispositivo']
-        cambiar_estado = False
+        actualizar_estado = False
 
         with _tabla_perif_lock:
             perif = next((p for p in tabla_perif if p["MAC"] == mac_key), None)
             if perif is None:
-                perif = {"MAC": mac_key, "Dispositivo": Dispositivo, "Ultimo_Ok": ahora, "Estado": 1}
+                perif = {"MAC": mac_key, "Dispositivo": Dispositivo, "Ultimo_Ok": ahora, "Estado": 1, "Informacion": info}
                 tabla_perif.append(perif)
-                cambiar_estado = True
+                actualizar_estado = True
+                logger.info(f"HW: {query_result[0]['Dispositivo']} OFFLINE -> ONLINE")
             else:
                 perif["Dispositivo"] = Dispositivo
                 perif["Ultimo_Ok"] = ahora
+                perif["Informacion"] = info
                 if perif["Estado"] == 0 or query_result[0]["Estado"] == 0:
                     perif["Estado"] = 1
-                    cambiar_estado = True
+                    actualizar_estado = True
+                    logger.info(f"HW: {query_result[0]['Dispositivo']} OFFLINE -> ONLINE")
 
-        if cambiar_estado:
-            logger.info(f"HW: {query_result[0]['Dispositivo']} OFFLINE -> ONLINE")
+        if offline == "1":
+            actualizar_estado = True
+
+        if actualizar_estado:
             # Actualizar el periférico existente solo al cambiar de estado
             mysql_execute(f"UPDATE TB_DOM_PERIF SET Direccion_IP = '{ip_address}', Estado = 1, Informacion = '{info}' WHERE MAC = '{mac_key}'")
 
